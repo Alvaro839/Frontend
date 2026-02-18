@@ -41,7 +41,8 @@ let products = [];
 
 async function cargarProductos() {
     try {
-       const res = await fetch('http://localhost:3000/api/productos')
+       const res = await fetch("https://backend-ti9b.onrender.com/api/productos")
+
 
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
