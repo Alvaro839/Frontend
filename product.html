@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Producto - TWINS TECH</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Estilos para el modal de imagen (agregar aquí o en styles.css) -->
+    <style>
+      
+/* Modal base */
+.image-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.7s ease;  /* fade-in y fade-out suave */
+}
+
+/* Cuando está abierto */
+.image-modal.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Imagen dentro del modal */
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7) rotate(-3deg);
+    max-width: 92vw;
+    max-height: 92vh;
+    object-fit: contain;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); /* elástica al entrar y salir */
+}
+
+/* Al abrir */
+.image-modal.active .modal-content {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    opacity: 1;
+}
+
+/* Botón cerrar - efecto más interactivo */
+.close-modal {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    color: #fec300;
+    font-size: 55px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px rgba(254,195,0,0.5);
+    z-index: 10000;
+}
+
+.close-modal:hover {
+    color: white;
+    transform: rotate(180deg) scale(1.15);
+    text-shadow: 0 0 20px #fec300;
+}
+
+/* Cursor en la imagen principal */
+#productImage {
+    cursor: zoom-in;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+#productImage:hover {
+    transform: scale(1.04);
+    box-shadow: 0 10px 30px rgba(254,195,0,0.3);
+}
+    </style>
+</head>
+<body>
+
+    <!-- Carga el header común -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(html => {
+                document.body.insertAdjacentHTML('afterbegin', html);
+                initDynamicMenu();
+            })
+            .catch(err => console.error(err));
+    </script>
+
+    <!-- Contenido del detalle del producto -->
+    <main class="product-detail-page">
+        <div class="product-detail-container">
+            <!-- Imagen grande (ahora clickable) -->
+            <div class="product-image-section">
+                <img id="productImage" src="" alt="Producto" loading="lazy">
+            </div>
+
+            <!-- Info principal (nombre + precio) -->
+            <div class="product-info-section">
+                <h1 id="productTitle"></h1>
+                <div class="product-price-box">
+                    <p id="productPrice"></p>
+                    <button class="add-to-cart-btn-large" onclick="addToCartFromDetail()">Añadir al Carrito</button>
+                    <a href="#" id="whatsappProductLink" class="whatsapp-product-btn" target="_blank" rel="noopener noreferrer">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
+            Contactar por WhatsApp
+        </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Apartado de especificaciones (solo descripción) -->
+        <section class="product-specs-section">
+            <h2>Especificaciones Técnicas</h2>
+            <div class="specs-paragraph" id="productSpecs">
+                <!-- El párrafo completo se genera con JS -->
+            </div>
+        </section>
+
+        <!-- Recomendados -->
+        <section class="recommended-section">
+            <h2>Productos relacionados</h2>
+            <div class="recommended-grid" id="recommendedProducts"></div>
+        </section>
+    </main>
+
+   
+<div id="imageModal" class="image-modal">
+    <span class="close-modal" onclick="closeModal()">×</span>
+    <img class="modal-content" id="modalImage" src="" alt="Vista previa">
+</div>
+
+    <script src="script.js"></script>
+    <script>
+        // Cargar detalle del producto desde la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = parseInt(urlParams.get('id'));
+
+        if (productId) {
+            showProductDetails(productId);
+        } else {
+            document.querySelector('.product-detail-container').innerHTML = '<h1>Producto no encontrado</h1>';
+        }
+
+        // Función para añadir al carrito desde detalle
+        function addToCartFromDetail() {
+            if (productId) addToCart(productId);
+        }
+
+        // Función para cerrar el modal
+       // Función para cerrar el modal con animación
+function closeModal() {
+    const modal = document.getElementById('imageModal');
+    if (!modal) return;
+
+    // Quitamos la clase active → inicia la animación de salida
+    modal.classList.remove('active');
+
+    // Esperamos a que termine la animación (mismo tiempo que la transición CSS)
+    setTimeout(() => {
+        modal.style.display = "none";
+    }, 700); // 700ms = tiempo de la transición (ajústalo si cambias el CSS)
+}
+
+// Cerrar al clic fuera
+window.onclick = function(event) {
+    const modal = document.getElementById('imageModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+};
+        
+
+        // Cerrar modal al hacer click fuera de la imagen
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
