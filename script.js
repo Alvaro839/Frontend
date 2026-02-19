@@ -1,23 +1,30 @@
 // 🔥 URL base de tu backend
-const BASE_URL = "http://localhost:3000";
+// backend en Render
+const BASE_URL = "https://backend-ti9b.onrender.com";
 
-// 🔥 helper para imágenes (NUNCA repites rutas)
-function getImageUrl(image) {
-    if (!image) {
-        return 'https://via.placeholder.com/300?text=Sin+imagen';
+// 🔥 Helper universal para imágenes
+function getImageUrl(imagePath) {
+    if (!imagePath) {
+        return 'https://placehold.co/300x300?text=Sin+imagen';
     }
-    
-    // Quitamos espacios al inicio/final y normalizamos
-    let ruta = (image || '').trim();
-    
-    // Si no empieza con /, le ponemos uno
+
+    // Si ya es URL completa, devolverla
+    if (imagePath.startsWith('http')) {
+        return imagePath;
+    }
+
+    // Limpiar espacios
+    let ruta = imagePath.trim();
+
+    // Asegurar que tenga /
     if (!ruta.startsWith('/')) {
         ruta = '/' + ruta;
     }
-    
-    // Siempre agregamos /uploads/ al principio
+
+    // IMPORTANTE: tu backend sirve imágenes desde /uploads
     return `${BASE_URL}/uploads${ruta}`;
 }
+
 
 
 
@@ -39,33 +46,28 @@ function saveCart(cart) {
 
 let products = [];
 
+
 async function cargarProductos() {
     try {
-       const res = await fetch("https://backend-ti9b.onrender.com/api/productos")
-
-
+        const res = await fetch(`${BASE_URL}/api/productos`);
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
+
         products = await res.json();
 
         console.log('Productos cargados:', products.length, 'ítems');
 
-        // Render inicial si estamos en la página principal
         if (document.getElementById('productsSection')) {
             displayProducts(products);
         }
 
-        // Inicializar menú solo cuando ya hay datos
         initDynamicMenu();
 
     } catch (error) {
-        console.error('Error al cargar productos desde el backend:', error);
-        // Opcional: mostrar mensaje al usuario
-        // const section = document.getElementById('productsSection');
-        // if (section) section.innerHTML = '<p style="color:red; text-align:center">No se pudieron cargar los productos</p>';
+        console.error('Error al cargar productos:', error);
     }
 }
+
 
 
 
@@ -893,7 +895,7 @@ function initOrUpdateIndicators() {
 // Integrar con cargarAnuncios()  ← ¡esto es clave!
 async function cargarAnuncios() {
     try {
-        const res = await fetch('http://localhost:3000/api/anuncios');
+        const res = await fetch(`${BASE_URL}/api/anuncios`);
         if (!res.ok) throw new Error('Error al cargar anuncios');
 
         const anuncios = await res.json();
@@ -908,15 +910,14 @@ async function cargarAnuncios() {
             slide.innerHTML = `
                 <a href="${anuncio.enlace || '#'}" target="_blank">
                     <img src="${getImageUrl(anuncio.imagen_url)}"
-                         alt="${anuncio.titulo}"
+                         alt="${anuncio.titulo || 'Anuncio'}"
                          loading="lazy"
-                         onerror="this.src='https://via.placeholder.com/728x90?text=Anuncio+no+disponible'">
+                         onerror="this.src='https://placehold.co/728x90?text=Anuncio+no+disponible'">
                 </a>
             `;
             track.appendChild(slide);
         });
 
-        // ¡Aquí está el fix! Después de crear los slides → reiniciamos el carrusel
         initOrUpdateIndicators();
 
         console.log(`Carrusel actualizado con ${anuncios.length} anuncios`);
@@ -925,6 +926,7 @@ async function cargarAnuncios() {
         console.error('Error cargando anuncios:', err);
     }
 }
+
 
 // Llamar a cargarAnuncios al inicio (ya lo tienes)
 document.addEventListener('DOMContentLoaded', () => {
@@ -1330,4 +1332,5 @@ async function cargarAnuncios() {
     } catch (err) {
         console.error('Error cargando anuncios:', err);
     }
+
 }
