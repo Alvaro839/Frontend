@@ -1305,32 +1305,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-async function cargarAnuncios() {
-    try {
-        const res = await fetch('http://localhost:3000/api/anuncios');
-        if (!res.ok) throw new Error('Error al cargar anuncios');
 
-        const anuncios = await res.json();
-        const track = document.getElementById('horizontalAdsTrack');
-        if (!track) return;
 
-        track.innerHTML = '';
-
-        anuncios.forEach(anuncio => {
-            const slide = document.createElement('div');
-            slide.className = 'carousel-slide';
-            slide.innerHTML = `
-                <a href="${anuncio.enlace || '#'}" target="_blank">
-                    <img src="${getImageUrl(anuncio.imagen_url)}"
-                         alt="${anuncio.titulo}"
-                         loading="lazy"
-                         onerror="this.src='https://via.placeholder.com/728x90?text=Anuncio+no+disponible'">
-                </a>
-            `;
-            track.appendChild(slide);
-        });
-    } catch (err) {
-        console.error('Error cargando anuncios:', err);
-    }
-
-}
