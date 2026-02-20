@@ -1236,6 +1236,8 @@ body {
     max-width: 500px;
     display: flex;
     margin: 0 30px;
+    position: relative;  /* 🔥 necesario */
+    z-index: 2000;
 }
 
 .search-container input {
@@ -2158,6 +2160,7 @@ body {
 #categoryMenu li:first-child:hover::before {
     transform: translateX(3px);
 }
+
 
 
 
