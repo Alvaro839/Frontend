@@ -62,36 +62,16 @@ carrito -->
 <nav class="categories">
     <ul id="categoryMenu">
        
-
         <!-- Tus categorías existentes -->
-          <li onclick="window.location.href='category.html?cat=all'" 
-            onmouseover="showSubmenu('all')"
-            onmouseout="startHideTimer()">Todas las categorias</li>
-
-        <li onclick="window.location.href='category.html?cat=discos'" 
-            onmouseover="showSubmenu('discos')" 
-            onmouseout="startHideTimer()">Discos</li>
-        <li onclick="window.location.href='category.html?cat=mouses'" 
-            onmouseover="showSubmenu('mouses')" 
-            onmouseout="startHideTimer()">Mouses</li>
-        <li onclick="window.location.href='category.html?cat=teclados-mouses'" 
-            onmouseover="showSubmenu('teclados-mouses')" 
-            onmouseout="startHideTimer()">Teclados-Mouses</li>
-        <li onclick="window.location.href='category.html?cat=teclados'" 
-            onmouseover="showSubmenu('teclados')" 
-            onmouseout="startHideTimer()">Teclados</li>
-        <li onclick="window.location.href='category.html?cat=adaptadores'" 
-            onmouseover="showSubmenu('adaptadores')" 
-            onmouseout="startHideTimer()">Adaptadores</li>
-        <li onclick="window.location.href='category.html?cat=baterias'" 
-            onmouseover="showSubmenu('baterias')" 
-            onmouseout="startHideTimer()">Baterías</li>
-        <li onclick="window.location.href='category.html?cat=cargadores'" 
-            onmouseover="showSubmenu('cargadores')" 
-            onmouseout="startHideTimer()">Cargadores</li>
-        <li onclick="window.location.href='category.html?cat=impresoras'" 
-            onmouseover="showSubmenu('impresoras')" 
-            onmouseout="startHideTimer()">Impresoras</li>
+          <li data-category="all">Todas las categorias</li>
+<li data-category="discos">Discos</li>
+<li data-category="mouses">Mouses</li>
+<li data-category="teclados-mouses">Teclados-Mouses</li>
+<li data-category="teclados">Teclados</li>
+<li data-category="adaptadores">Adaptadores</li>
+<li data-category="baterias">Baterías</li>
+<li data-category="cargadores">Cargadores</li>
+<li data-category="impresoras">Impresoras</li>
     </ul>
 
     
@@ -151,4 +131,5 @@ carrito -->
             }
         }, 50); // Pequeño delay para asegurar que el HTML esté listo
     })();
+
 </script>
