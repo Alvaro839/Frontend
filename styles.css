@@ -121,15 +121,16 @@ body {
 }
 
 /*LAS CATEGORIAS DE MRD */
+/* CATEGORÍAS */
 .categories {
     background: #111111;
     border-bottom: 2px solid #222;
-    position: relative;   /* 🔥 CLAVE */
+    position: relative;
     width: 100%;
+    z-index: 1000; /* necesario para que el submenu quede arriba */
 }
 
-
-/* Contenedor interno de categorías (centrado y limitado) */
+/* Contenedor interno centrado */
 .categories > ul {
     display: flex;
     justify-content: center;
@@ -140,51 +141,38 @@ body {
     padding: 0 20px;
 
     list-style: none;
-    position: relative; /* referencia para submenu */
+    position: relative;
 }
-
-
-/* Lista de categorías centrada directamente */
-
 
 /* Cada ítem */
 .categories li {
-    padding: 18px 24px;               /* un poco más ancho para que se vea mejor */
+    padding: 18px 24px;
     cursor: pointer;
     color: white;
     font-weight: 500;
-    font-size: 1rem;                  /* fija el tamaño para uniformidad */
+    font-size: 1rem;
     transition: all 0.3s ease;
     position: relative;
-    border-radius: 8px;               /* redondeado suave como el hover del submenú */
+    border-radius: 8px;
     white-space: nowrap;
-    background: transparent;          /* importante: sin fondo por defecto */
+    background: transparent;
 }
 
-
+/* Hover */
 .categories li:hover {
     background-color: #fec300;
     color: #0a0c10;
-    background-color: #fec300;
-
 }
 
-
-
-
-.category-list li:hover {
-    background: var(--primary-yellow);
-    color: var(--primary-black);
-}
-
-/* Scrollbar bonito */
-.category-list::-webkit-scrollbar {
-    height: 8px;
-}
-
-.category-list::-webkit-scrollbar-thumb {
-    background: var(--primary-yellow);
-    border-radius: 4px;
+/* Líneas divisorias opcionales */
+.categories li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: -20px;
+    top: 30%;
+    height: 40%;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 
@@ -1946,34 +1934,6 @@ body {
     background: #333;
 }
 
-/* ============================================
-   BARRA DE CATEGORÍAS MEJORADA
-============================================ */
-
-/* Barra de categorías también con fondo oscuro */
-.categories {
-    background: #111111; /* Un negro ligeramente diferente para contraste */
-    border-bottom: 2px solid #222;
-    position: relative;
-    z-index: 1000;
-}
-
-.categories ul {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.categories li {
-    color: #ffffff;
-    position: relative;
-}
-
-.categories li:hover {
-    background: #fec300;
-    color: #000000;
-}
-
 
 
 /* Líneas divisorias entre categorías */
@@ -2198,6 +2158,7 @@ body {
 #categoryMenu li:first-child:hover::before {
     transform: translateX(3px);
 }
+
 
 
 
