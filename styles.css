@@ -1681,14 +1681,7 @@ body {
 }
 
 
-@media (max-width: 1024px) {
-    .category-container {
-        flex-direction: column;
-    }
-    .filters-sidebar {
-        width: 100%;
-    }
-}
+
 @media (max-width: 768px) {
     .products-grid {
         grid-template-columns: repeat(2, 1fr); /* 👈 2 productos por fila */
@@ -2443,4 +2436,5 @@ img {
     height: auto;
 
 }
+
 
