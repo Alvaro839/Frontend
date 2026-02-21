@@ -916,20 +916,22 @@ async function cargarAnuncios() {
         anuncios.forEach(anuncio => {
             const slide = document.createElement('div');
             slide.className = 'carousel-slide';
+
             slide.innerHTML = `
-                <a href="${anuncio.enlace || '#'}" target="_blank">
-                    <img src="${getImageUrl(anuncio.imagen_url)}"
-                         alt="${anuncio.titulo || 'Anuncio'}"
-                         loading="lazy"
-                         onerror="this.src='https://placehold.co/728x90?text=Anuncio+no+disponible'">
-                </a>
+                <img 
+                    src="${BASE_URL}${anuncio.imagen_url}"
+                    alt="${anuncio.titulo || 'Anuncio'}"
+                    loading="lazy"
+                    onerror="this.src='https://placehold.co/1200x400?text=Anuncio+no+disponible'"
+                >
             `;
+
             track.appendChild(slide);
         });
 
         initOrUpdateIndicators();
 
-        console.log(`Carrusel actualizado con ${anuncios.length} anuncios`);
+        console.log(`Carrusel cargado con ${anuncios.length} anuncios`);
 
     } catch (err) {
         console.error('Error cargando anuncios:', err);
