@@ -1323,9 +1323,16 @@ body {
 }
 
 
-/* Carrusel */
+/* Carrusel de anuncios */
+
+.horizontal-ads-carousel {
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+}
+
+/* Contenedor */
 .carousel-container {
-    
     width: 100%;
     position: relative;
 }
@@ -1336,20 +1343,21 @@ body {
     transition: transform 0.5s ease;
 }
 
-/* Cada slide mantiene proporción */
+/* Slide */
 .carousel-slide {
     flex: 0 0 100%;
-    aspect-ratio: 16 / 5; /* Ajusta según tus banners */
+    aspect-ratio: 16 / 5;
     overflow: hidden;
 }
 
-/* Imagen SIN deformación */
+/* Imagen SIN altura fija */
 .carousel-slide img {
     width: 100%;
-    height: 400px; /* ajusta según tu diseño */
+    height: 100%;      /* 👈 IMPORTANTE */
     object-fit: cover;
     display: block;
 }
+
 @media (max-width: 768px) {
     .carousel-slide {
         aspect-ratio: 16 / 9;
@@ -2428,4 +2436,5 @@ html, body {
 img {
     max-width: 100%;
     height: auto;
+
 }
