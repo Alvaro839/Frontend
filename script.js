@@ -144,7 +144,16 @@ function displayProducts(filteredProducts = products) {
 
     });
 }
-
+// 🔥 Activar animación fade cuando cargan las imágenes
+document.querySelectorAll('.fade-img').forEach(img => {
+    if (img.complete) {
+        img.classList.add('loaded');
+    } else {
+        img.addEventListener('load', () => {
+            img.classList.add('loaded');
+        });
+    }
+});
 
 
 function showProductDetails(idFromUrl) {
@@ -1114,38 +1123,58 @@ function loadCategoryFilters() {
     });
 }
 
-// Cargar y mostrar productos filtrados (categoría + precio)
-function loadCategoryProducts(cat = 'all') {
-    const container = document.getElementById('productsSection');
-    const title = document.getElementById('categoryTitle');
+// Cargar y mostrar productos filtrados (categoría + precio) //
+ function loadCategoryProducts(cat = 'all') {
+    const container = document.getElementById('productsSection'); 
+    const title = document.getElementById('categoryTitle'); 
     const count = document.getElementById('resultCount');
 
-    if (!container) {
-        console.error("No se encontró #productsSection");
-        return;
-    }
+    if (!container) { 
+        console.error("No se encontró #productsSection"); 
+        return; }
 
-    // Mensaje temporal mientras carga
+   // Mensaje temporal mientras carga
     container.innerHTML = '<p style="text-align:center; padding:4rem; font-size:1.4rem;">Cargando productos...</p>';
 
-    // Esperamos a que products esté cargado (por si llega tarde)
-    if (!products || products.length === 0) {
-        setTimeout(() => loadCategoryProducts(cat), 500);
-        return;
-    }
-
-    // Filtramos por categoría
+ // Esperamos a que products esté cargado (por si llega tarde) 
+ if (!products || products.length === 0) 
+    { setTimeout(() => loadCategoryProducts(cat), 500);
+         return; }
+    // Filtramos por categoría 
     let filtered = products;
-    if (cat !== 'all') {
-        filtered = products.filter(p => normalizeString(p.category) === normalizeString(cat));
-    }
+    if (cat !== 'all') { 
+        filtered = products.filter(p => normalizeString(p.category) ===
+         normalizeString(cat)); }
+// FILTRO DE PRECIO (MIN + MAX)
+// ============================================
 
-    // Aplicamos filtro de precio si existe
-    const priceRange = document.getElementById('priceRange');
-    if (priceRange) {
-        const maxPrice = parseInt(priceRange.value) || Infinity;
-        filtered = filtered.filter(p => (p.price || 0) <= maxPrice);
-    }
+const minInput = document.getElementById('minPrice');
+const maxInput = document.getElementById('maxPrice');
+const priceRange = document.getElementById('priceRange'); // opcional si aún usas slider
+
+let minPrice = 0;
+let maxPrice = Infinity;
+
+// Si existen inputs manuales → prioridad
+if (minInput || maxInput) {
+    minPrice = parseFloat(minInput?.value) || 0;
+    maxPrice = parseFloat(maxInput?.value) || Infinity;
+}
+// Si NO existen inputs pero sí slider → fallback
+else if (priceRange) {
+    maxPrice = parseFloat(priceRange.value) || Infinity;
+}
+
+// Validación
+if (minPrice > maxPrice) {
+    alert("El precio mínimo no puede ser mayor que el máximo.");
+    return;
+}
+
+filtered = filtered.filter(p => {
+    const price = parseFloat(p.price) || 0;
+    return price >= minPrice && price <= maxPrice;
+});
 
     // Limpiamos el contenedor
     container.innerHTML = '';
@@ -1204,37 +1233,53 @@ function loadCategoryProducts(cat = 'all') {
 // ============================================
 // INICIALIZACIÓN FINAL (integrar TODO aquí)
 // ============================================
-
-
 document.addEventListener('DOMContentLoaded', () => {
   
     cargarProductos().then(() => {
 
-    initSearchSuggestions();
+        initSearchSuggestions();
+
         const filterList = document.getElementById('categoryFilterList');
         if (filterList) {
             loadCategoryFilters();  
             console.log("Sidebar categorías cargado exitosamente."); 
         }
         
-       
         const urlParams = new URLSearchParams(window.location.search);
-        const cat = urlParams.get('cat') || 'all';
-        if (document.getElementById('productsSection')) {
-            loadCategoryProducts(cat);
-        }
-        
-      
+        const catParam = urlParams.get('cat');
         const id = urlParams.get('id');
-       if (document.getElementById('productsSection')) {
-    displayProducts(products);  // ← CAMBIO: Usa la función que agrupa por categorías
-}
+
+        // =========================
+        // 📦 PÁGINA CON PRODUCTOS
+        // =========================
+        if (document.getElementById('productsSection')) {
+
+            // 🏠 HOME (sin ?cat=)
+            if (!catParam) {
+                displayProducts(products);
+            } 
+            // 📂 CATEGORÍA (con ?cat=algo)
+            else {
+                loadCategoryProducts(catParam);
+            }
+        }
+
+        // =========================
+        // 📄 DETALLE DE PRODUCTO
+        // =========================
+        if (id && document.getElementById('productTitle')) {
+            showProductDetails(id);
+        }
+
     }).catch(err => {
-        console.error("Error cargando products para sidebar:", err);
+        console.error("Error cargando products:", err);
       
         const filterList = document.getElementById('categoryFilterList');
-        if (filterList) filterList.innerHTML = '<li style="color:red;">Error cargando categorías</li>';
+        if (filterList) {
+            filterList.innerHTML = '<li style="color:red;">Error cargando categorías</li>';
+        }
     });
+
 });
     
     // Carga del footer 

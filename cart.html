@@ -9,61 +9,62 @@
 
 <body>
 
-<!-- JS principal -->
+<div class="page-wrapper">
+
+    <!-- HEADER -->
+    <div id="header-container"></div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="cart-page">
+
+        <h1>Carrito de Compras</h1>
+
+        <div id="cartItems" class="cart-items-list"></div>
+
+        <div class="cart-summary">
+            <p>Total: <span id="cartTotal">0</span> USD</p>
+            <button class="checkout-btn" onclick="checkout()">
+                Finalizar Compra en WhatsApp
+            </button>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <div id="footer-container"></div>
+
+</div>
+
+<!-- JS PRINCIPAL -->
 <script src="script.js" defer></script>
 
-<!-- Cargar header y luego el carrito -->
+<!-- Cargar Header -->
 <script>
-// Reemplazar el fetch actual con ESTE:
 fetch('header.html')
     .then(response => response.text())
     .then(html => {
-        document.body.insertAdjacentHTML('afterbegin', html);
-        
-        // Inicializar el menú después de cargar
+        document.getElementById('header-container').innerHTML = html;
+
         setTimeout(() => {
             if (typeof initHeaderAfterLoad === 'function') {
                 initHeaderAfterLoad();
             }
-            
-            // Inicializar otras funciones específicas de la página
             if (typeof updateCart === 'function') updateCart();
             if (typeof renderCartItems === 'function') renderCartItems();
-            if (typeof loadCategoryProducts === 'function') {
-                const urlParams = new URLSearchParams(window.location.search);
-                const currentCat = urlParams.get('cat') || 'all';
-                loadCategoryProducts(currentCat);
-            }
         }, 200);
     })
     .catch(err => console.error('Error cargando header:', err));
 </script>
 
-<!-- Contenido del carrito -->
-<main class="cart-page">
-    <h1>Carrito de Compras</h1>
-
-    <div id="cartItems" class="cart-items-list"></div>
-
-    <div class="cart-summary">
-        <p>Total: <span id="cartTotal">0</span> USD</p>
-        <button class="checkout-btn" onclick="checkout()">
-            Finalizar Compra en WhatsApp
-        </button>
-    </div>
-</main>
-
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c449a7bbfdbe9ba',t:'MTc2OTQ3ODY3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
-
-<!-- AL FINAL DE cart.html, antes de </body> -->
-<div id="footer-container"></div>
-
+<!-- Cargar Footer -->
 <script>
-    fetch('footer.html')
-        .then(response => response.text())
-        .then(data => {
-            document.getElementById('footer-container').innerHTML = data;
-        })
-        .catch(error => console.error('Error al cargar el footer:', error));
+fetch('footer.html')
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('footer-container').innerHTML = data;
+    })
+    .catch(error => console.error('Error al cargar el footer:', error));
 </script>
+
+</body>
+</html>

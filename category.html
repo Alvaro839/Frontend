@@ -25,18 +25,20 @@
 
                 
                 <h3>Filtro por Precio</h3>
-<div class="price-filter">
-    <div class="range-container">
-        <input type="range" id="priceRange" min="0" max="10000" value="10000" step="100">
-        <span id="priceCurrent" class="price-current">S/ 10,000</span>
+<div class="price-filter-box">
+
+    <h4>Filtrar por precio</h4>
+
+    <div class="price-inputs">
+        <input type="number" id="minPrice" placeholder="Mínimo" />
+        <input type="number" id="maxPrice" placeholder="Máximo" />
     </div>
-    <div class="price-labels">
-        <span>S/ 0</span>
-        <span>S/ 10,000</span>
-    </div>
+
+    <button id="applyFilters">Aplicar filtros</button>
+
 </div>
 
-<button id="applyFilters">Aplicar Filtros</button>
+
 <!-- Botón opcional, pero ahora filtra automáticamente al soltar el slider -->
 <button id="applyFilters" style="display:none;">Aplicar Filtros</button> <!-- oculto si quieres automático -->  
             </aside>
