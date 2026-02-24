@@ -600,14 +600,14 @@ window.addEventListener('resize', function() {
 });
 
 // ============================================
-// FUNCIONES DEL CARRITO
+// FUNCIONES DEL CARRITO (VERSIÓN FINAL CORREGIDA - FEB 2026)
 // ============================================
 
 function addToCart(id) {
     const product = products.find(p => p.id === id);
     if (!product) return;
 
-    const cart = getCart(); // Usar la función getCart
+    const cart = getCart();
 
     const existing = cart.find(item => item.id === id);
     if (existing) {
@@ -620,93 +620,160 @@ function addToCart(id) {
         });
     }
 
-    saveCart(cart); // Guardar carrito real
-    updateCart();   // Actualizar contador
+    saveCart(cart);
+    updateCart();           // actualiza contador del header
+    // Si estás en la página del carrito, actualiza también la vista
+    if (document.getElementById('cartItems')) renderCartItems();
 }
 
-// Función para renderizar carrito
+// ====================== RENDER CARRITO (YA ESTÁ CORRECTO) ======================
 function renderCartItems() {
-    const cartItems = document.getElementById('cartItems');
-    if (cartItems) {
-        cartItems.innerHTML = '';
-        const currentCart = getCart(); // 🔥 OBTENER CARRITO ACTUAL
-        currentCart.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.classList.add('cart-item');
-            div.innerHTML = `
-                <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck(${index})">
-                <img src="${getImageUrl(item.imagen)}" alt="${item.name}">
-                <div class="cart-item-details">
-                    <h3>${item.name}</h3>
-                    <p class="cart-item-price">${item.price} USD c/u</p>
-                    <div class="cart-item-quantity">
-                        Cantidad: <input type="number" value="${item.quantity}" min="1" onchange="updateQuantity(${index}, this.value)">
-                    </div>
-                    <p class="cart-item-subtotal">Subtotal: ${item.price * item.quantity} USD</p>
-                </div>
-                <div class="cart-item-actions">
-                    <button onclick="removeFromCart(${index})">Eliminar</button>
-                </div>
-            `;
-            cartItems.appendChild(div);
-        });
-        updateCartTotal();
+    const cartItemsContainer = document.getElementById('cartItems');
+    const emptyCartContainer = document.getElementById('emptyCart');
+
+    if (!cartItemsContainer || !emptyCartContainer) {
+        console.warn('Elementos del carrito no encontrados en el DOM');
+        return;
     }
+
+    const currentCart = getCart();
+
+    if (currentCart.length === 0) {
+        cartItemsContainer.innerHTML = '';
+        emptyCartContainer.style.display = 'flex';
+        updateCartSummary();
+        updateCart();
+        return;
+    }
+
+    emptyCartContainer.style.display = 'none';
+    cartItemsContainer.innerHTML = '';
+
+    currentCart.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.classList.add('cart-item');
+
+        div.innerHTML = `
+            <input type="checkbox" 
+                   ${item.checked ? 'checked' : ''} 
+                   onchange="toggleCheck(${index})">
+
+            <img src="${getImageUrl(item.imagen)}" 
+                 alt="${item.name}" 
+                 loading="lazy"
+                 onerror="this.src='https://placehold.co/300x300?text=Sin+imagen'">
+
+            <div class="cart-item-details">
+                <h3>${item.name}</h3>
+                <p class="cart-item-price">${parseFloat(item.price).toFixed(2)} USD c/u</p>
+                
+                <div class="cart-item-quantity">
+                    Cantidad: 
+                    <input type="number" 
+                           value="${item.quantity}" 
+                           min="1" 
+                           onchange="updateQuantity(${index}, this.value)">
+                </div>
+                
+                <p class="cart-item-subtotal">
+                    Subtotal: ${(item.price * item.quantity).toFixed(2)} USD
+                </p>
+            </div>
+
+            <div class="cart-item-actions">
+                <button onclick="removeFromCart(${index})">Eliminar</button>
+            </div>
+        `;
+
+        cartItemsContainer.appendChild(div);
+    });
+
+    updateCartSummary();
+    updateCart();
 }
 
-// Nueva función para actualizar cantidad
+// ====================== ACTUALIZAR CANTIDAD ======================
 function updateQuantity(index, newQuantity) {
-    const cart = getCart(); // 🔥 OBTENER CARRITO
+    const cart = getCart();
     cart[index].quantity = parseInt(newQuantity) || 1;
     saveCart(cart);
-    renderCartItems();
-    updateCart();
+    renderCartItems();   // re-renderiza todo
 }
 
+// ====================== MARCAR/DESMARCAR ======================
 function toggleCheck(index) {
-    const cart = getCart(); // 🔥 OBTENER CARRITO
+    const cart = getCart();
     cart[index].checked = !cart[index].checked;
-    updateCartTotal();
     saveCart(cart);
+    renderCartItems();   // ← ahora sí actualiza todo correctamente
 }
 
+// ====================== ELIMINAR PRODUCTO ======================
 function removeFromCart(index) {
-    const cart = getCart(); // 🔥 OBTENER CARRITO
+    const cart = getCart();
     cart.splice(index, 1);
     saveCart(cart);
-    updateCart();
-    renderCartItems();
+    renderCartItems();   // ← re-renderiza todo
 }
 
+// ====================== CONTADOR DEL HEADER ======================
 function updateCart() {
     const cartCountElement = document.getElementById('cartCount');
     if (!cartCountElement) return;
 
     const cart = getCart();
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-
     cartCountElement.textContent = totalItems;
 }
 
-function updateCartTotal() {
-    const cartTotalElement = document.getElementById('cartTotal');
-    if (cartTotalElement) {
-        const cart = getCart(); // 🔥 OBTENER CARRITO
-        const total = cart.reduce((sum, item) => item.checked ? sum + (item.price * item.quantity) : sum, 0);
-        cartTotalElement.textContent = total;
+// ====================== RESUMEN SUBTOTAL + TOTAL (NUEVA FUNCIÓN) ======================
+function updateCartSummary() {
+    const subtotalEl = document.getElementById('subtotal');
+    const totalEl    = document.getElementById('cartTotal');
+    const shippingEl = document.getElementById('shipping');
+
+    if (!subtotalEl || !totalEl) return;
+
+    const cart = getCart();
+    const checkedItems = cart.filter(item => item.checked);
+
+    const subtotal = checkedItems.reduce((sum, item) => {
+        return sum + (parseFloat(item.price) * item.quantity);
+    }, 0);
+
+    const shipping = 0; // Cambia a 10 o el valor que quieras cuando definas envío
+
+    const total = subtotal + shipping;
+
+    subtotalEl.textContent = subtotal.toFixed(2) + ' USD';
+    totalEl.textContent    = total.toFixed(2) + ' USD';
+
+    if (shippingEl) {
+        shippingEl.textContent = shipping === 0 ? 'Gratis' : shipping.toFixed(2) + ' USD';
     }
 }
 
+// ====================== CHECKOUT (WHATSAPP CORRECTO) ======================
 function checkout() {
-    const cart = getCart(); // 🔥 OBTENER CARRITO
+    const cart = getCart();
     const checkedItems = cart.filter(item => item.checked);
-    if (checkedItems.length === 0) return alert('No hay productos seleccionados.');
 
-    const productList = checkedItems.map(item => `${item.name} x${item.quantity}`).join(', ');
-    const total = checkedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const message = `Hola, deseo más información sobre estos productos - (${productList}) y el valor de los productos: ${total} USD`;
-    const whatsappUrl = `https://wa.me/915211111?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    if (checkedItems.length === 0) {
+        alert('Selecciona al menos un producto para continuar');
+        return;
+    }
+
+    const productList = checkedItems.map(item => 
+        `${item.name} ×${item.quantity}`
+    ).join(' • ');
+
+    const total = checkedItems.reduce((sum, item) => 
+        sum + (parseFloat(item.price) * item.quantity), 0
+    );
+
+    const message = `Hola Twins Tech 👋\n\nQuiero comprar:\n${productList}\n\nTotal: ${total.toFixed(2)} USD\n\n¿Me confirmas stock y envío a Lima?`;
+
+    window.open(`https://wa.me/933488495?text=${encodeURIComponent(message)}`, '_blank');
 }
 
 // ============================================
@@ -1354,3 +1421,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+// ================================================
+// FIX GLOBAL DEFINITIVO DEL CONTADOR DEL CARRITO
+// Este código se ejecuta en TODAS las páginas después de que todo cargue
+// ================================================
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        if (typeof updateCart === 'function') {
+            updateCart();
+            console.log('✅ Contador del carrito actualizado GLOBALMENTE (window.load)');
+        }
+    }, 10);
+});

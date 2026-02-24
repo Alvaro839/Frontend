@@ -1,21 +1,19 @@
 <!-- header.html -->
-<!-- Header superior negro -->
-<!-- Top bar mejorada y alineada con footer -->
+<!-- Top bar superior negra -->
 <div class="top-bar">
     <div class="top-bar-content">
         <div class="contact-info">
-            <span>Servicio de ventas: <a href="https://wa.me/933488495" target="_blank">933 488 495</a></span>
-            <span> Email: <a href="mailto:ventas@twins-tech.pe">ventas@twins-tech.pe</a></span>
+            <span><a href="https://wa.me/933488495" target="_blank">933 488 495</a></span>
+            <span><a href="mailto:ventas@twins-tech.pe">ventas@twins-tech.pe</a></span>
             
-               
-        <a href="https://www.google.com/maps?ll=-12.055367,-77.038038&z=15&t=m&hl=es&gl=PE&mapclient=embed&q=Jr.+Caman%C3%A1+1166+Lima+15001" 
-           class="direccion-link" 
-           title="Ver ubicación en mapa" 
-           target="_blank" 
-           rel="noopener noreferrer"> Jr. Cañamá 1166, Cercado de Lima
-            </div>
-
-      
+            <a href="https://www.google.com/maps?ll=-12.055367,-77.038038&z=15&t=m&hl=es&gl=PE&mapclient=embed&q=Jr.+Caman%C3%A1+1166+Lima+15001" 
+               class="direccion-link" 
+               title="Ver ubicación en mapa" 
+               target="_blank" 
+               rel="noopener noreferrer">
+               Jr. Cañamá 1166, Cercado de Lima
+            </a>
+        </div>
 
         <div class="social-links">
             <a href="https://www.facebook.com/twinstechimport" target="_blank">
@@ -31,105 +29,114 @@
     </div>
 </div>
 
-<!-- Header principal con logo, búsqueda y 
- 
-
-
-carrito -->
-<!-- En header.html, modificar el header principal -->
+<!-- Header principal (oscuro) -->
 <header class="main-header dark-header">
     <div class="header-top">
+        <!-- Logo -->
         <div class="logo">
             <a href="index.html">
                 <img src="img/Logos/TwinsTech.png" alt="TWINS TECH" class="logo-img">
             </a>
         </div>
+
+        <!-- Buscador -->
         <div class="search-container">
             <div class="search-input-wrapper">
                 <input type="text" id="searchInput" placeholder="Buscar productos..." autocomplete="off">
                 <button class="search-btn" onclick="performSearch()">Buscar</button>
-            </div>  
+            </div>
             <div id="searchSuggestions" class="search-suggestions"></div>
         </div>
+
+        <!-- Carrito con contador -->
         <div class="cart">
-    <a href="cart.html" class="cart-link" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='cart.html';">
-        🛒 
-    </a>
-</div>
+            <a href="cart.html" class="cart-link">
+                🛒
+                <span id="cartCount" class="cart-count">0</span>
+            </a>
+        </div>
+    </div>
 </header>
 
-
+<!-- Menú de categorías -->
 <nav class="categories">
     <ul id="categoryMenu">
-       
-        <!-- Tus categorías existentes -->
-          <li data-category="all">Todas las categorias</li>
-<li data-category="discos">Discos</li>
-<li data-category="mouses">Mouses</li>
-<li data-category="teclados-mouses">Teclados-Mouses</li>
-<li data-category="teclados">Teclados</li>
-<li data-category="adaptadores">Adaptadores</li>
-<li data-category="baterias">Baterías</li>
-<li data-category="cargadores">Cargadores</li>
-<li data-category="impresoras">Impresoras</li>
+        <li data-category="all">Todas las categorias</li>
+        <li data-category="discos">Discos</li>
+        <li data-category="mouses">Mouses</li>
+        <li data-category="teclados-mouses">Teclados-Mouses</li>
+        <li data-category="teclados">Teclados</li>
+        <li data-category="adaptadores">Adaptadores</li>
+        <li data-category="baterias">Baterías</li>
+        <li data-category="cargadores">Cargadores</li>
+        <li data-category="impresoras">Impresoras</li>
     </ul>
 
-    
-    <div id="submenu" class="submenu" onmouseover="cancelHideTimer()" onmouseout="startHideTimer()"></div>
+    <div id="submenu" class="submenu"></div>
 </nav>
 
-
-<!-- Script para inicializar el menú DESPUÉS de cargar -->
+<!-- Script FINAL - FIX ULTRA ROBUSTO DEL CARRITO -->
 <script>
-    // Esta función se ejecuta inmediatamente después de insertar el header
     (function initHeaderMenu() {
-        // Esperar un momento para que el DOM procese el HTML insertado
         setTimeout(() => {
+            // Inicialización del menú
             const menuItems = document.querySelectorAll('#categoryMenu li[data-category]');
             const submenu = document.getElementById('submenu');
-            
+
             if (menuItems.length > 0 && submenu) {
-                // Agregar eventos a cada item del menú
                 menuItems.forEach(item => {
                     const category = item.dataset.category;
-                    
-                    // Click para redirigir
+
                     item.addEventListener('click', (e) => {
                         e.stopPropagation();
                         window.location.href = `category.html?cat=${category}`;
                     });
-                    
-                    // Mouseover para mostrar submenú
-                    item.addEventListener('mouseenter', () => {
-                        if (typeof showSubmenu === 'function') {
-                            showSubmenu(category);
-                        }
-                    });
-                    
-                    // Mouseout para ocultar
-                    item.addEventListener('mouseleave', () => {
-                        if (typeof startHideTimer === 'function') {
-                            startHideTimer();
-                        }
-                    });
-                });
-                
-                // Eventos para el submenú
-                submenu.addEventListener('mouseenter', () => {
-                    if (typeof cancelHideTimer === 'function') {
-                        cancelHideTimer();
-                    }
-                });
-                
-                submenu.addEventListener('mouseleave', () => {
-                    if (typeof startHideTimer === 'function') {
-                        startHideTimer();
-                    }
-                });
-                
-                console.log('Menú del header inicializado correctamente');
-            }
-        }, 50); // Pequeño delay para asegurar que el HTML esté listo
-    })();
 
+                    item.addEventListener('mouseenter', () => {
+                        if (typeof showSubmenu === 'function') showSubmenu(category);
+                    });
+
+                    item.addEventListener('mouseleave', () => {
+                        if (typeof startHideTimer === 'function') startHideTimer();
+                    });
+                });
+
+                submenu.addEventListener('mouseenter', () => {
+                    if (typeof cancelHideTimer === 'function') cancelHideTimer();
+                });
+                submenu.addEventListener('mouseleave', () => {
+                    if (typeof startHideTimer === 'function') startHideTimer();
+                });
+            }
+
+            console.log('✅ Menú del header inicializado correctamente');
+
+            // ================================================
+            // FIX ULTRA ROBUSTO DEL CONTADOR (hasta 4 segundos de espera)
+            // ================================================
+            function tryUpdateCart() {
+                if (typeof updateCart === 'function') {
+                    updateCart();
+                    console.log('✅ Contador actualizado desde header (inmediato)');
+                    return;
+                }
+
+                let attempts = 0;
+                const interval = setInterval(() => {
+                    attempts++;
+                    if (typeof updateCart === 'function') {
+                        updateCart();
+                        console.log('✅ Contador actualizado después de reintento #' + attempts);
+                        clearInterval(interval);
+                    } else if (attempts > 80) {   // 80 × 50ms = 4 segundos
+                        clearInterval(interval);
+                        console.warn('⚠️ updateCart() nunca se cargó en el header');
+                    }
+                }, 50);
+            }
+
+            tryUpdateCart();
+
+        }, 120); // 120ms = tiempo óptimo
+    })();
 </script>

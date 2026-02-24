@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras - TWINS TECH</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body>
 
 <div class="page-wrapper">
@@ -16,18 +16,55 @@
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="cart-page">
+        <div class="cart-container">
+            <h1>Tu Carrito de Compras</h1>
 
-        <h1>Carrito de Compras</h1>
+            <div class="cart-layout">
+                
+                <!-- Lista de productos o mensaje vacío -->
+                <div class="cart-items-section">
+                    
+                    <!-- Contenedor donde se renderizan los productos -->
+                    <div id="cartItems" class="cart-items-list"></div>
 
-        <div id="cartItems" class="cart-items-list"></div>
+                    <!-- Mensaje carrito vacío (SIN display:none - lo controla el JS) -->
+                    <div id="emptyCart" class="empty-cart-message">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h2>Tu carrito está vacío</h2>
+                        <p>¡Parece que no has agregado ningún producto aún!</p>
+                        <a href="index.html" class="btn-continue-shopping">Continuar comprando</a>
+                    </div>
 
-        <div class="cart-summary">
-            <p>Total: <span id="cartTotal">0</span> USD</p>
-            <button class="checkout-btn" onclick="checkout()">
-                Finalizar Compra en WhatsApp
-            </button>
+                </div>
+
+                <!-- Resumen del pedido (sticky en desktop) -->
+                <aside class="cart-summary-section">
+                    <div class="cart-summary">
+                        <h3>Resumen del pedido</h3>
+                        <div class="summary-row">
+                            <span>Subtotal (productos):</span>
+                            <span id="subtotal">0.00 USD</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Envío:</span>
+                            <span id="shipping">Por calcular</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Total:</span>
+                            <span id="cartTotal">0.00 USD</span>
+                        </div>
+
+                        <button class="checkout-btn" onclick="checkout()">
+                            <i class="fab fa-whatsapp"></i> Finalizar Compra por WhatsApp
+                        </button>
+
+                        <p class="secure-note">
+                            <i class="fas fa-lock"></i> Compra segura • Pago contra entrega disponible
+                        </p>
+                    </div>
+                </aside>
+            </div>
         </div>
-
     </main>
 
     <!-- FOOTER -->
@@ -46,12 +83,10 @@ fetch('header.html')
         document.getElementById('header-container').innerHTML = html;
 
         setTimeout(() => {
-            if (typeof initHeaderAfterLoad === 'function') {
-                initHeaderAfterLoad();
-            }
+            if (typeof initHeaderAfterLoad === 'function') initHeaderAfterLoad();
             if (typeof updateCart === 'function') updateCart();
-            if (typeof renderCartItems === 'function') renderCartItems();
-        }, 200);
+            if (typeof renderCartItems === 'function') renderCartItems();   // ← importante
+        }, 150);
     })
     .catch(err => console.error('Error cargando header:', err));
 </script>
