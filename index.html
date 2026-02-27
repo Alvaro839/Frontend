@@ -4,56 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TWINS TECH - Tienda de Hardware Tecnológico</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Agregamos ?v= para evitar caché del navegador -->
+    <link rel="stylesheet" href="styles.css?v=20260227">
 </head>
 <body>
 
+    <!-- Header dinámico -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(data => document.body.insertAdjacentHTML('afterbegin', data))
+            .catch(err => console.error('Error cargando header:', err));
+    </script>
 
+    <!-- Carrusel horizontal de anuncios -->
+    <section class="horizontal-ads-carousel">
+        <div class="carousel-container">
+            <button class="carousel-arrow prev" onclick="moveHorizontalAds(-1)">❮</button>
 
-<script>
-    fetch('header.html')
-        .then(response => response.text())
-        .then(data => document.body.insertAdjacentHTML('afterbegin', data))
-        .catch(err => console.error('Error cargando header:', err));
-</script>
+            <div class="carousel-track" id="horizontalAdsTrack">
+                <!-- Las imágenes se cargarán aquí con JavaScript -->
+            </div>
 
-
-<!-- Carrusel horizontal de anuncios - solo 1 imagen visible -->
-<section class="horizontal-ads-carousel">
-    <div class="carousel-container">
-        <button class="carousel-arrow prev" onclick="moveHorizontalAds(-1)">❮</button>
-
-        <div class="carousel-track" id="horizontalAdsTrack">
-            <!-- Las imágenes se cargarán aquí con JavaScript -->
+            <button class="carousel-arrow next" onclick="moveHorizontalAds(1)">❯</button>
         </div>
 
-        <button class="carousel-arrow next" onclick="moveHorizontalAds(1)">❯</button>
-    </div>
-
-    <div class="carousel-indicators" id="horizontalAdsIndicators"></div>
-</section>
-
+        <div class="carousel-indicators" id="horizontalAdsIndicators"></div>
+    </section>
 
     <!-- Sección de Productos -->
     <section class="products-container">
         <div id="productsSection"></div>
-        </div>
     </section>
 
-    <!-- Anuncio horizontal fijo a la izquierda -->
-<div class="side-ad">
-    
-        
-    </a>
-    <button class="close-ad" onclick="closeSideAd()">×</button>
-</div>
+    <!-- Anuncio horizontal fijo a la izquierda (si lo usas) -->
+    <div class="side-ad">
+        <!-- Contenido del anuncio lateral -->
+        <button class="close-ad" onclick="closeSideAd()">×</button>
+    </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
+    <!-- Scripts -->
+    <!-- Agregamos ?v= para evitar caché del navegador -->
+    <script src="script.js?v=20260227"></script>
 
-
-    
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c44d75a682ae9b0',t:'MTc2OTQ4MTE2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
-
-<!-- FOOTER CSMR ACA EMPIEZA  -->
-

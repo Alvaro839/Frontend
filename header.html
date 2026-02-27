@@ -39,18 +39,29 @@
             </a>
         </div>
 
-        <!-- Buscador -->
+        <!-- Buscador - Mejorado con <form> para mejor accesibilidad y Enter nativo -->
         <div class="search-container">
-            <div class="search-input-wrapper">
-                <input type="text" id="searchInput" placeholder="Buscar productos..." autocomplete="off">
-                <button class="search-btn" onclick="performSearch()">Buscar</button>
-            </div>
+            <form id="searchForm" class="search-form" action="javascript:void(0);">
+                <div class="search-input-wrapper">
+                    <input 
+                        type="search" 
+                        id="searchInput" 
+                        name="q" 
+                        placeholder="Buscar productos..." 
+                        autocomplete="off"
+                        aria-label="Buscar productos en Twins Tech"
+                    >
+                    <button type="submit" class="search-btn" aria-label="Realizar búsqueda">
+                        Buscar
+                    </button>
+                </div>
+            </form>
             <div id="searchSuggestions" class="search-suggestions"></div>
         </div>
 
         <!-- Carrito con contador -->
         <div class="cart">
-            <a href="cart.html" class="cart-link">
+            <a href="cart.html" class="cart-link" aria-label="Ver carrito de compras">
                 🛒
                 <span id="cartCount" class="cart-count">0</span>
             </a>
@@ -75,11 +86,13 @@
     <div id="submenu" class="submenu"></div>
 </nav>
 
-<!-- Script FINAL - FIX ULTRA ROBUSTO DEL CARRITO -->
+<!-- Scripts del header -->
 <script>
-    (function initHeaderMenu() {
+    // IIFE para inicialización del header
+    (function initHeader() {
+        // Esperamos un poco para que el DOM esté listo y las funciones externas existan
         setTimeout(() => {
-            // Inicialización del menú
+            // 1. Inicialización del menú de categorías (lo que ya tenías)
             const menuItems = document.querySelectorAll('#categoryMenu li[data-category]');
             const submenu = document.getElementById('submenu');
 
@@ -109,15 +122,13 @@
                 });
             }
 
-            console.log('✅ Menú del header inicializado correctamente');
+            console.log('✅ Menú de categorías inicializado');
 
-            // ================================================
-            // FIX ULTRA ROBUSTO DEL CONTADOR (hasta 4 segundos de espera)
-            // ================================================
+            // 2. Manejo del carrito (lo que ya tenías)
             function tryUpdateCart() {
                 if (typeof updateCart === 'function') {
                     updateCart();
-                    console.log('✅ Contador actualizado desde header (inmediato)');
+                    console.log('✅ Contador de carrito actualizado');
                     return;
                 }
 
@@ -126,17 +137,37 @@
                     attempts++;
                     if (typeof updateCart === 'function') {
                         updateCart();
-                        console.log('✅ Contador actualizado después de reintento #' + attempts);
+                        console.log('✅ Contador actualizado tras ' + attempts + ' intentos');
                         clearInterval(interval);
-                    } else if (attempts > 80) {   // 80 × 50ms = 4 segundos
+                    } else if (attempts > 80) {
                         clearInterval(interval);
-                        console.warn('⚠️ updateCart() nunca se cargó en el header');
+                        console.warn('⚠️ No se pudo encontrar updateCart()');
                     }
                 }, 50);
             }
 
             tryUpdateCart();
 
-        }, 120); // 120ms = tiempo óptimo
+            // 3. Búsqueda: Enter + Submit del formulario
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+
+            if (searchForm && searchInput) {
+                // Submit del formulario (Enter o botón)
+                searchForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    performSearch();
+                });
+
+                // Redundancia: Enter directo en el input
+                searchInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === 'NumpadEnter') {
+                        e.preventDefault();
+                        performSearch();
+                    }
+                });
+            }
+
+        }, 10); // pequeño retraso para asegurar que todo el DOM esté listo
     })();
 </script>

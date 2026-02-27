@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categoría - TWINS TECH</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Agregamos ?v= para evitar que el navegador use versión antigua en caché -->
+    <link rel="stylesheet" href="styles.css?v=20260227">
 </head>
 <body>
 
-    <!-- Carga el header común (incluye barra de categorías) -->
+    <!-- Header dinámico -->
     <script>
         fetch('header.html')
             .then(response => response.text())
@@ -18,30 +19,43 @@
 
     <main class="category-page">
         <div class="category-container">
-            <!-- Filtros laterales -->
-            <aside class="filters-sidebar">
+            
+            <!-- Sidebar solo para Desktop -->
+            <aside class="filters-sidebar desktop-only">
                 <h3>Categorías</h3>
                 <ul class="category-filter-list" id="categoryFilterList"></ul>
 
-                
                 <h3>Filtro por Precio</h3>
-<div class="price-filter-box">
-
-    <h4>Filtrar por precio</h4>
-
-    <div class="price-inputs">
-        <input type="number" id="minPrice" placeholder="Mínimo" />
-        <input type="number" id="maxPrice" placeholder="Máximo" />
-    </div>
-
-    <button id="applyFilters">Aplicar filtros</button>
-
-</div>
-
-
-<!-- Botón opcional, pero ahora filtra automáticamente al soltar el slider -->
-<button id="applyFilters" style="display:none;">Aplicar Filtros</button> <!-- oculto si quieres automático -->  
+                <div class="price-filter-box">
+                    <h4>Rango de precio</h4>
+                    <div class="price-inputs">
+                        <input type="number" id="minPrice" placeholder="Mínimo" />
+                        <input type="number" id="maxPrice" placeholder="Máximo" />
+                    </div>
+                    <button id="applyFilters">Aplicar filtros</button>
+                </div>
             </aside>
+
+            <!-- Versión Móvil - Botón bonito centrado -->
+            <div class="mobile-filters">
+                <div class="mobile-filter-header" id="mobileCategoryHeader">
+                    <span class="header-text">Filtros y Categorías</span>
+                    <span class="toggle-arrow">▼</span>
+                </div>
+                <div class="mobile-filter-content" id="mobileCategoryContent">
+                    <h4>Categorías</h4>
+                    <ul class="category-filter-list" id="categoryFilterListMobile"></ul>
+
+                    <h4>Filtro por Precio</h4>
+                    <div class="price-filter-box">
+                        <div class="price-inputs">
+                            <input type="number" id="mobileMinPrice" placeholder="Mínimo" />
+                            <input type="number" id="mobileMaxPrice" placeholder="Máximo" />
+                        </div>
+                        <button id="mobileApplyFilters">Aplicar filtros</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- Productos -->
             <section class="products-section">
@@ -50,47 +64,54 @@
                     <p id="resultCount">Mostrando 0 productos</p>
                 </div>
 
-                <div class="products-grid" id="productsSection">
-                    <!-- Aquí se cargan los productos -->
-                </div>
+                <div class="products-grid" id="productsSection"></div>
             </section>
         </div>
     </main>
 
-    <script src="script.js"></script>
-   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const cat = urlParams.get('cat') || 'all';
+    <!-- Script principal - con anti-caché -->
+    <script src="script.js?v=20260227"></script>
 
-        loadCategoryFilters();        // sidebar categorías
-        loadCategoryProducts(cat);    // productos iniciales
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cat = urlParams.get('cat') || 'all';
 
-        // Inicializar filtro de precio
-        const priceRange = document.getElementById('priceRange');
-        const priceCurrent = document.getElementById('priceCurrent');
-        const applyBtn = document.getElementById('applyFilters');
+            // Cargar filtros y productos
+            loadCategoryFilters();
+            loadCategoryProducts(cat);
 
-        if (priceRange && priceCurrent) {
-            // Formato bonito con comas (S/ 1,234)
-            const updateDisplay = () => {
-                const value = Number(priceRange.value);
-                priceCurrent.textContent = `S/ ${value.toLocaleString('es-PE')}`;
-            };
+            // Copiar categorías al móvil
+            setTimeout(() => {
+                const desktopList = document.getElementById('categoryFilterList');
+                const mobileList = document.getElementById('categoryFilterListMobile');
+                if (desktopList && mobileList) {
+                    mobileList.innerHTML = desktopList.innerHTML;
+                }
+            }, 600);
 
-            // Actualiza visualmente en tiempo real
-            priceRange.oninput = updateDisplay;
-            updateDisplay(); // inicial
-        }
+            // Collapsible móvil
+            const header = document.getElementById('mobileCategoryHeader');
+            const content = document.getElementById('mobileCategoryContent');
+            const arrow = header.querySelector('.toggle-arrow');
 
-        // Botón "Aplicar Filtros" → recarga productos con filtro
-        if (applyBtn) {
-            applyBtn.addEventListener('click', () => {
-                loadCategoryProducts(cat);
-            });
-        }
-    });
-</script>
-    
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c44a2a7b858b52e',t:'MTc2OTQ3OTAwNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+            if (header && content && arrow) {
+                header.addEventListener('click', () => {
+                    content.classList.toggle('show');
+                    arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+                });
+            }
+
+            // Aplicar filtros desde móvil (sincroniza con desktop)
+            const mobileApplyBtn = document.getElementById('mobileApplyFilters');
+            if (mobileApplyBtn) {
+                mobileApplyBtn.addEventListener('click', () => {
+                    document.getElementById('minPrice').value = document.getElementById('mobileMinPrice').value || '';
+                    document.getElementById('maxPrice').value = document.getElementById('mobileMaxPrice').value || '';
+                    loadCategoryProducts(cat);
+                });
+            }
+        });
+    </script>
+</body>
 </html>

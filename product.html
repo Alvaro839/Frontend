@@ -3,187 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalle del Producto - TWINS TECH</title>
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- Estilos para el modal de imagen (agregar aquí o en styles.css) -->
-    <style>
-      
-/* Modal base */
-.image-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background-color: rgba(0, 0, 0, 0.92);
-    backdrop-filter: blur(8px);
-    opacity: 0;
-    transition: opacity 0.7s ease;  /* fade-in y fade-out suave */
-}
-
-/* Cuando está abierto */
-.image-modal.active {
-    display: block;
-    opacity: 1;
-}
-
-/* Imagen dentro del modal */
-.modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.7) rotate(-3deg);
-    max-width: 92vw;
-    max-height: 92vh;
-    object-fit: contain;
-    border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-    opacity: 0;
-    transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); /* elástica al entrar y salir */
-}
-
-/* Al abrir */
-.image-modal.active .modal-content {
-    transform: translate(-50%, -50%) scale(1) rotate(0deg);
-    opacity: 1;
-}
-
-/* Botón cerrar - efecto más interactivo */
-.close-modal {
-    position: absolute;
-    top: 30px;
-    right: 40px;
-    color: #fec300;
-    font-size: 55px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-shadow: 0 0 10px rgba(254,195,0,0.5);
-    z-index: 10000;
-}
-
-.close-modal:hover {
-    color: white;
-    transform: rotate(180deg) scale(1.15);
-    text-shadow: 0 0 20px #fec300;
-}
-
-/* Cursor en la imagen principal */
-#productImage {
-    cursor: zoom-in;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-#productImage:hover {
-    transform: scale(1.04);
-    box-shadow: 0 10px 30px rgba(254,195,0,0.3);
-}
-    </style>
+    <title>Categoría - TWINS TECH</title>
+    <!-- Agregamos ?v= para evitar caché del navegador -->
+    <link rel="stylesheet" href="styles.css?v=20260227">
 </head>
 <body>
 
-    <!-- Carga el header común -->
+    <!-- Header dinámico -->
     <script>
         fetch('header.html')
             .then(response => response.text())
-            .then(html => {
-                document.body.insertAdjacentHTML('afterbegin', html);
-                initDynamicMenu();
-            })
-            .catch(err => console.error(err));
+            .then(data => document.body.insertAdjacentHTML('afterbegin', data))
+            .catch(err => console.error('Error cargando header:', err));
     </script>
 
-    <!-- Contenido del detalle del producto -->
-    <main class="product-detail-page">
-        <div class="product-detail-container">
-            <!-- Imagen grande (ahora clickable) -->
-            <div class="product-image-section">
-                <img id="productImage" src="" alt="Producto" loading="lazy">
-            </div>
+    <main class="category-page">
+        <div class="category-container">
+            
+            <!-- Sidebar solo para Desktop -->
+            <aside class="filters-sidebar desktop-only">
+                <h3>Categorías</h3>
+                <ul class="category-filter-list" id="categoryFilterList"></ul>
 
-            <!-- Info principal (nombre + precio) -->
-            <div class="product-info-section">
-                <h1 id="productTitle"></h1>
-                <div class="product-price-box">
-                    <p id="productPrice"></p>
-                    <button class="add-to-cart-btn-large" onclick="addToCartFromDetail()">Añadir al Carrito</button>
-                    <a href="#" id="whatsappProductLink" class="whatsapp-product-btn" target="_blank" rel="noopener noreferrer">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
-            Contactar por WhatsApp
-        </a>
+                <h3>Filtro por Precio</h3>
+                <div class="price-filter-box">
+                    <h4>Rango de precio</h4>
+                    <div class="price-inputs">
+                        <input type="number" id="minPrice" placeholder="Mínimo" />
+                        <input type="number" id="maxPrice" placeholder="Máximo" />
+                    </div>
+                    <button id="applyFilters">Aplicar filtros</button>
+                </div>
+            </aside>
+
+            <!-- Versión Móvil - Botón bonito centrado -->
+            <div class="mobile-filters">
+                <div class="mobile-filter-header" id="mobileCategoryHeader">
+                    <span class="header-text">Filtros y Categorías</span>
+                    <span class="toggle-arrow">▼</span>
+                </div>
+                <div class="mobile-filter-content" id="mobileCategoryContent">
+                    <h4>Categorías</h4>
+                    <ul class="category-filter-list" id="categoryFilterListMobile"></ul>
+
+                    <h4>Filtro por Precio</h4>
+                    <div class="price-filter-box">
+                        <div class="price-inputs">
+                            <input type="number" id="mobileMinPrice" placeholder="Mínimo" />
+                            <input type="number" id="mobileMaxPrice" placeholder="Máximo" />
+                        </div>
+                        <button id="mobileApplyFilters">Aplicar filtros</button>
+                    </div>
                 </div>
             </div>
+
+            <!-- Productos -->
+            <section class="products-section">
+                <div class="category-header">
+                    <h1 id="categoryTitle">Categoría</h1>
+                    <p id="resultCount">Mostrando 0 productos</p>
+                </div>
+
+                <div class="products-grid" id="productsSection"></div>
+            </section>
         </div>
-
-        <!-- Apartado de especificaciones (solo descripción) -->
-        <section class="product-specs-section">
-            <h2>Especificaciones Técnicas</h2>
-            <div class="specs-paragraph" id="productSpecs">
-                <!-- El párrafo completo se genera con JS -->
-            </div>
-        </section>
-
-        <!-- Recomendados -->
-        <section class="recommended-section">
-            <h2>Productos relacionados</h2>
-            <div class="recommended-grid" id="recommendedProducts"></div>
-        </section>
     </main>
 
-   
-<div id="imageModal" class="image-modal">
-    <span class="close-modal" onclick="closeModal()">×</span>
-    <img class="modal-content" id="modalImage" src="" alt="Vista previa">
-</div>
+    <!-- Script principal - con anti-caché -->
+    <script src="script.js?v=20260227"></script>
 
-    <script src="script.js"></script>
     <script>
-        // Cargar detalle del producto desde la URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const productId = parseInt(urlParams.get('id'));
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cat = urlParams.get('cat') || 'all';
 
-        if (productId) {
-            showProductDetails(productId);
-        } else {
-            document.querySelector('.product-detail-container').innerHTML = '<h1>Producto no encontrado</h1>';
-        }
+            // Cargar filtros y productos
+            loadCategoryFilters();
+            loadCategoryProducts(cat);
 
-        // Función para añadir al carrito desde detalle
-        function addToCartFromDetail() {
-            if (productId) addToCart(productId);
-        }
+            // Copiar categorías al móvil (solo una vez)
+            setTimeout(() => {
+                const desktopList = document.getElementById('categoryFilterList');
+                const mobileList = document.getElementById('categoryFilterListMobile');
+                if (desktopList && mobileList) {
+                    mobileList.innerHTML = desktopList.innerHTML;
+                }
+            }, 600);
 
-        // Función para cerrar el modal
-       // Función para cerrar el modal con animación
-function closeModal() {
-    const modal = document.getElementById('imageModal');
-    if (!modal) return;
+            // Collapsible móvil
+            const header = document.getElementById('mobileCategoryHeader');
+            const content = document.getElementById('mobileCategoryContent');
+            const arrow = header.querySelector('.toggle-arrow');
 
-    // Quitamos la clase active → inicia la animación de salida
-    modal.classList.remove('active');
-
-    // Esperamos a que termine la animación (mismo tiempo que la transición CSS)
-    setTimeout(() => {
-        modal.style.display = "none";
-    }, 700); // 700ms = tiempo de la transición (ajústalo si cambias el CSS)
-}
-
-// Cerrar al clic fuera
-window.onclick = function(event) {
-    const modal = document.getElementById('imageModal');
-    if (event.target === modal) {
-        closeModal();
-    }
-};
-        
-
-        // Cerrar modal al hacer click fuera de la imagen
-        window.onclick = function(event) {
-            const modal = document.getElementById('imageModal');
-            if (event.target == modal) {
-                modal.style.display = "none";
+            if (header && content && arrow) {
+                header.addEventListener('click', () => {
+                    content.classList.toggle('show');
+                    arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+                });
             }
-        }
+
+            // Aplicar filtros desde móvil (sincroniza con desktop)
+            const mobileApplyBtn = document.getElementById('mobileApplyFilters');
+            if (mobileApplyBtn) {
+                mobileApplyBtn.addEventListener('click', () => {
+                    document.getElementById('minPrice').value = document.getElementById('mobileMinPrice').value || '';
+                    document.getElementById('maxPrice').value = document.getElementById('mobileMaxPrice').value || '';
+                    loadCategoryProducts(cat);
+                });
+            }
+        });
     </script>
 </body>
 </html>
