@@ -1390,3 +1390,31 @@ window.addEventListener('load', () => {
 });
 
 
+function updateCart() {
+    const cartCountElement = document.getElementById('cartCount');
+    
+    // Si el elemento no existe aún (header no cargado), salimos sin error
+    if (!cartCountElement) {
+        console.log('Elemento #cartCount no encontrado aún (header pendiente)');
+        return;
+    }
+
+    const cart = getCart();
+    
+    // Seguridad extra por si localStorage está corrupto
+    if (!Array.isArray(cart)) {
+        console.warn('Carrito corrupto → reiniciando');
+        saveCart([]);
+        cartCountElement.textContent = '0';
+        return;
+    }
+
+    const totalItems = cart.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+    
+    cartCountElement.textContent = totalItems;
+    
+    // Opcional: ocultar si es 0
+    cartCountElement.style.display = totalItems > 0 ? 'flex' : 'none';
+
+    console.log(`Carrito actualizado: ${totalItems} artículos`);
+}
