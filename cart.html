@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras - TWINS TECH</title>
-    <link rel="stylesheet" href="styles.css?v=20260228">
+    <!-- Versión actualizada para romper caché -->
+    <link rel="stylesheet" href="styles.css?v=20260228d">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <div class="page-wrapper">
 
-    <!-- HEADER -->
+    <!-- HEADER - con protección anti-duplicado y limpieza automática -->
     <div id="header-container"></div>
 
     <!-- CONTENIDO PRINCIPAL -->
@@ -23,21 +24,17 @@
                 
                 <!-- Lista de productos o mensaje vacío -->
                 <div class="cart-items-section">
-                    
-                    <!-- Contenedor donde se renderizan los productos -->
                     <div id="cartItems" class="cart-items-list"></div>
 
-                    <!-- Mensaje carrito vacío (SIN display:none - lo controla el JS) -->
                     <div id="emptyCart" class="empty-cart-message">
                         <i class="fas fa-shopping-cart"></i>
                         <h2>Tu carrito está vacío</h2>
                         <p>¡Parece que no has agregado ningún producto aún!</p>
                         <a href="index.html" class="btn-continue-shopping">Continuar comprando</a>
                     </div>
-
                 </div>
 
-                <!-- Resumen del pedido (sticky en desktop) -->
+                <!-- Resumen del pedido -->
                 <aside class="cart-summary-section">
                     <div class="cart-summary">
                         <h3>Resumen del pedido</h3>
@@ -55,7 +52,7 @@
                         </div>
 
                         <button class="checkout-btn" onclick="checkout()">
-                            <i class="fab fa-whatsapp"></i> Finalizar Compra por WhatsApp hoy hoy hoy
+                            <i class="fab fa-whatsapp"></i> Finalizar Compra por WhatsApp
                         </button>
 
                         <p class="secure-note">
@@ -73,35 +70,87 @@
 </div>
 
 <!-- JS PRINCIPAL -->
-<script src="script.js?v=20260228" defer></script>
+<script src="script.js?v=20260228d" defer></script>
 
-<!-- Cargar Header -->
+<!-- Cargar Header - BLINDADO + LIMPIEZA AUTOMÁTICA -->
 <script>
-fetch('header.html')
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById('header-container').innerHTML = html;
+    (function loadCartHeaderSafely() {
+        // Chequeo: ¿ya hay header completo en el DOM?
+        const headerParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+        const countBefore = headerParts.length;
 
-        setTimeout(() => {
-            if (typeof initHeaderAfterLoad === 'function') initHeaderAfterLoad();
-            if (typeof updateCart === 'function') {
-                updateCart();
-                console.log('✅ Contador carrito actualizado después de cargar header (cart.html)');
-            }
-            if (typeof renderCartItems === 'function') renderCartItems();   // ← importante para cart page
-        }, 300);
-    })
-    .catch(err => console.error('Error cargando header:', err));
+        if (countBefore >= 3) {  // top-bar + header + nav ≈ 3
+            console.log(`🛡️ Header YA completo en cart.html (${countBefore} partes) → NO fetch`);
+            // Actualizamos carrito y renderizamos items del carrito
+            setTimeout(() => {
+                if (typeof updateCart === 'function') updateCart();
+                if (typeof renderCartItems === 'function') renderCartItems();
+            }, 200);
+            return;
+        }
+
+        console.log('🟢 Cargando header en cart.html (no existe completo)');
+
+        fetch('header.html?v=20260228d')
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.text();
+            })
+            .then(html => {
+                // Doble chequeo antes de insertar
+                const currentCount = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                if (currentCount >= 3) {
+                    console.warn(`⚠️ Header apareció durante fetch en cart.html (${currentCount}) → skip`);
+                    return;
+                }
+
+                console.log('Insertando header en #header-container...');
+                document.getElementById('header-container').innerHTML = html;
+
+                // Contamos después
+                const countAfter = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                console.log(`Elementos de header después de insertar: ${countAfter}`);
+
+                // Limpieza automática si hay duplicados
+                if (countAfter > 3) {
+                    console.error('¡DUPLICADOS DETECTADOS en cart.html! Limpiando extras...');
+                    const allParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+                    
+                    // Dejamos solo la primera ocurrencia de cada tipo
+                    const keepers = new Set();
+                    for (let el of allParts) {
+                        const classKey = el.className; // o usa una clave más específica si necesitas
+                        if (keepers.has(classKey)) {
+                            el.remove();
+                            console.log('Eliminado duplicado:', classKey);
+                        } else {
+                            keepers.add(classKey);
+                        }
+                    }
+                }
+
+                // Actualizaciones finales
+                setTimeout(() => {
+                    if (typeof initHeaderAfterLoad === 'function') initHeaderAfterLoad();
+                    if (typeof updateCart === 'function') {
+                        updateCart();
+                        console.log('✅ Contador carrito actualizado después de header en cart.html');
+                    }
+                    if (typeof renderCartItems === 'function') renderCartItems();
+                }, 400);
+            })
+            .catch(err => console.error('Error cargando header en cart.html:', err));
+    })();
 </script>
 
 <!-- Cargar Footer -->
 <script>
-fetch('footer.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('footer-container').innerHTML = data;
-    })
-    .catch(error => console.error('Error al cargar el footer:', error));
+    fetch('footer.html?v=20260228d')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('footer-container').innerHTML = data;
+        })
+        .catch(error => console.error('Error footer:', error));
 </script>
 
 </body>

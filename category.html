@@ -4,17 +4,89 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categoría - TWINS TECH</title>
-    <!-- Agregamos ?v= para evitar que el navegador use versión antigua en caché -->
-    <link rel="stylesheet" href="styles.css?v=20260227">
+    <!-- Versión actualizada -->
+    <link rel="stylesheet" href="styles.css?v=20260228c">
 </head>
 <body>
 
-    <!-- Header dinámico -->
+    <!-- DEPURACIÓN inicial (para ver si hay algo antes del fetch) -->
     <script>
-        fetch('header.html')
-            .then(response => response.text())
-            .then(data => document.body.insertAdjacentHTML('afterbegin', data))
-            .catch(err => console.error('Error cargando header:', err));
+        console.log('🚨 Contador inicial de elementos clave:', {
+            topBars: document.querySelectorAll('.top-bar').length,
+            mainHeaders: document.querySelectorAll('.main-header').length,
+            categoriesNav: document.querySelectorAll('.categories').length
+        });
+    </script>
+
+    <!-- Header dinámico - BLINDADO + LIMPIEZA AUTOMÁTICA -->
+    <script>
+        (function loadHeaderSafely() {
+            // Selector completo: top-bar + header principal + nav categorías
+            const headerParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+            const countBefore = headerParts.length;
+
+            console.log(`Chequeo inicial: ${countBefore} elementos de header encontrados`);
+
+            if (countBefore >= 3) {  // top-bar + header + nav ≈ 3
+                console.warn(`🛡️ Header YA completo (${countBefore} partes) → NO fetch`);
+                setTimeout(() => {
+                    if (typeof updateCart === 'function') updateCart();
+                }, 150);
+                return;
+            }
+
+            console.log('🟢 Procediendo a fetch (no hay header completo)');
+
+            fetch('header.html?v=20260228c')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.text();
+                })
+                .then(data => {
+                    // Chequeo FINAL antes de insertar
+                    const currentCount = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                    if (currentCount >= 3) {
+                        console.warn(`⚠️ Header apareció durante fetch (${currentCount}) → abort`);
+                        return;
+                    }
+
+                    console.log('Insertando header...');
+                    document.body.insertAdjacentHTML('afterbegin', data);
+
+                    // Contamos después
+                    const countAfter = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                    console.log(`Elementos después de insertar: ${countAfter}`);
+
+                    // Limpieza automática si hay duplicados
+                    if (countAfter > 3) {
+                        console.error('¡DUPLICADOS DETECTADOS! Limpiando extras...');
+                        const allParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+                        
+                        // Dejamos solo la primera ocurrencia de cada tipo
+                        const keepers = new Set();
+                        for (let el of allParts) {
+                            if (keepers.has(el.className)) {
+                                el.remove();
+                                console.log('Eliminado duplicado:', el.className);
+                            } else {
+                                keepers.add(el.className);
+                            }
+                        }
+                    }
+
+                    // Actualizaciones finales
+                    setTimeout(() => {
+                        if (typeof updateCart === 'function') {
+                            updateCart();
+                            console.log('✅ Carrito actualizado post-inserción');
+                        }
+                        if (typeof initHeaderAfterLoad === 'function') {
+                            initHeaderAfterLoad();
+                        }
+                    }, 400);
+                })
+                .catch(err => console.error('Error fetch header:', err));
+        })();
     </script>
 
     <main class="category-page">
@@ -36,7 +108,7 @@
                 </div>
             </aside>
 
-            <!-- Versión Móvil - Botón bonito centrado -->
+            <!-- Versión Móvil -->
             <div class="mobile-filters">
                 <div class="mobile-filter-header" id="mobileCategoryHeader">
                     <span class="header-text">Filtros y Categorías</span>
@@ -69,47 +141,54 @@
         </div>
     </main>
 
-    <!-- Script anti-caché -->
-    <script src="script.js?v=20260227"></script>
+    <!-- Script principal -->
+    <script src="script.js?v=20260228c"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded disparado en category.html');
+            
             const urlParams = new URLSearchParams(window.location.search);
             const cat = urlParams.get('cat') || 'all';
 
-            // Cargar filtros y productos
             loadCategoryFilters();
             loadCategoryProducts(cat);
 
-            // Copiar categorías al móvil
             setTimeout(() => {
                 const desktopList = document.getElementById('categoryFilterList');
                 const mobileList = document.getElementById('categoryFilterListMobile');
                 if (desktopList && mobileList) {
                     mobileList.innerHTML = desktopList.innerHTML;
+                    
+                    const activeLink = mobileList.querySelector(`a[href*="cat=${cat}"]`);
+                    if (activeLink) activeLink.parentElement.classList.add('active');
                 }
-            }, 600);
+            }, 800);
 
-            // Collapsible móvil
-            const header = document.getElementById('mobileCategoryHeader');
-            const content = document.getElementById('mobileCategoryContent');
-            const arrow = header.querySelector('.toggle-arrow');
+            const mobileHeader = document.getElementById('mobileCategoryHeader');
+            const mobileContent = document.getElementById('mobileCategoryContent');
+            const arrow = mobileHeader?.querySelector('.toggle-arrow');
 
-            if (header && content && arrow) {
-                header.addEventListener('click', () => {
-                    content.classList.toggle('show');
-                    arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+            if (mobileHeader && mobileContent && arrow) {
+                mobileHeader.addEventListener('click', () => {
+                    mobileContent.classList.toggle('show');
+                    arrow.textContent = mobileContent.classList.contains('show') ? '▲' : '▼';
                 });
             }
 
-            // Aplicar filtros desde móvil (sincroniza con desktop)
             const mobileApplyBtn = document.getElementById('mobileApplyFilters');
             if (mobileApplyBtn) {
                 mobileApplyBtn.addEventListener('click', () => {
-                    document.getElementById('minPrice').value = document.getElementById('mobileMinPrice').value || '';
-                    document.getElementById('maxPrice').value = document.getElementById('mobileMaxPrice').value || '';
+                    document.getElementById('minPrice').value = document.getElementById('mobileMinPrice')?.value || '';
+                    document.getElementById('maxPrice').value = document.getElementById('mobileMaxPrice')?.value || '';
                     loadCategoryProducts(cat);
                 });
+            }
+
+            if (urlParams.has('search')) {
+                const searchTerm = urlParams.get('search');
+                const titleEl = document.getElementById('categoryTitle');
+                if (titleEl) titleEl.textContent = `Resultados para "${searchTerm}"`;
             }
         });
     </script>

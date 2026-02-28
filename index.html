@@ -4,58 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TWINS TECH - Tienda de Hardware Tecnológico</title>
-    <!-- Versión actualizada para romper caché -->
-    <link rel="stylesheet" href="styles.css?v=20260228">
+    <link rel="stylesheet" href="styles.css?v=20260228d">
 </head>
 <body>
 
-    <!-- Header dinámico -->
+    <!-- Header dinámico - con limpieza automática de duplicados -->
     <script>
-        fetch('header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.body.insertAdjacentHTML('afterbegin', data);
-                
-                // ¡IMPORTANTE! Actualizamos el carrito DESPUÉS de que el header esté en el DOM
+        (function loadHeaderSafely() {
+            // Selector completo para capturar top-bar + header + nav
+            const headerElements = document.querySelectorAll('.top-bar, .main-header, .categories');
+
+            if (headerElements.length > 0) {
+                console.log(`🛡️ Elementos de header ya existen (${headerElements.length}) → skip fetch`);
                 setTimeout(() => {
-                    if (typeof updateCart === 'function') {
-                        updateCart();
-                        console.log('✅ Contador carrito actualizado después de cargar header (index.html)');
+                    if (typeof updateCart === 'function') updateCart();
+                }, 150);
+                return;
+            }
+
+            console.log('🟢 No hay elementos de header → fetch');
+
+            fetch('header.html?v=20260228d')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.text();
+                })
+                .then(data => {
+                    if (document.querySelectorAll('.top-bar, .main-header, .categories').length > 0) {
+                        console.warn('⚠️ Header apareció durante fetch → abort');
+                        return;
                     }
-                }, 300);
-            })
-            .catch(err => console.error('Error cargando header:', err));
+
+                    document.body.insertAdjacentHTML('afterbegin', data);
+
+                    const countAfter = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                    console.log(`Elementos después de insertar: ${countAfter}`);
+
+                    // Limpieza automática si hay duplicados
+                    if (countAfter > 3) {  // top-bar + header + nav = ~3
+                        console.error('¡DUPLICADOS DETECTADOS! Limpiando extras...');
+                        const all = document.querySelectorAll('.top-bar, .main-header, .categories');
+                        for (let i = 3; i < all.length; i++) {  // deja los primeros 3
+                            all[i].remove();
+                            console.log('Eliminado duplicado:', all[i].outerHTML.substring(0, 100) + '...');
+                        }
+                    }
+
+                    setTimeout(() => {
+                        if (typeof updateCart === 'function') {
+                            updateCart();
+                            console.log('✅ Carrito actualizado post-inserción');
+                        }
+                    }, 400);
+                })
+                .catch(err => console.error('Error fetch header:', err));
+        })();
     </script>
 
-    <!-- Carrusel horizontal de anuncios -->
+    <!-- Resto de tu página (carrusel, productos, etc.) -->
     <section class="horizontal-ads-carousel">
-        <div class="carousel-container">
-            <button class="carousel-arrow prev" onclick="moveHorizontalAds(-1)">❮</button>
-
-            <div class="carousel-track" id="horizontalAdsTrack">
-                <!-- Las imágenes se cargarán aquí con JavaScript -->
-            </div>
-
-            <button class="carousel-arrow next" onclick="moveHorizontalAds(1)">❯</button>
-        </div>
-
-        <div class="carousel-indicators" id="horizontalAdsIndicators"></div>
+        <!-- ... -->
     </section>
 
-    <!-- Sección de Productos -->
     <section class="products-container">
         <div id="productsSection"></div>
     </section>
 
-    <!-- Anuncio horizontal fijo a la izquierda (si lo usas) -->
     <div class="side-ad">
-        <!-- Contenido del anuncio lateral -->
-        <button class="close-ad" onclick="closeSideAd()">×</button>
+        <!-- ... -->
     </div>
 
-    <!-- Scripts -->
-    <!-- Versión actualizada para romper caché -->
-    <script src="script.js?v=20260228"></script>
-
+    <script src="script.js?v=20260228d"></script>
 </body>
 </html>

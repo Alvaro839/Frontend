@@ -275,11 +275,16 @@ let isMouseInSubmenu = false;
 
 let hideTimer = null;
 
+
+
 function showSubmenu(category) {
     cancelHideTimer();
 
     const submenu = document.getElementById('submenu');
-    if (!submenu) return;
+    if (!submenu) {
+        console.error('No se encontró #submenu');
+        return;
+    }
 
     if (!products || products.length === 0) {
         console.warn("Productos no cargados aún. Reintentando...");
@@ -291,19 +296,14 @@ function showSubmenu(category) {
     submenu.removeAttribute("style");
     submenu.classList.add("active");
 
-    /* =========================================================
-       CASO: TODAS LAS CATEGORÍAS  ←─ AQUÍ ESTÁ EL CAMBIO PRINCIPAL
-    ========================================================= */
-    if (category === "all") {
+    console.log(`Abriendo submenú para: "${category}"`);
 
+    // ── CASO 1: "Todas las categorías" ────────────────────────────────────────
+    if (category === "all") {
         const allCategories = [...new Set(products.map(p => p.category))];
 
         if (allCategories.length === 0) {
-            submenu.innerHTML = `
-                <p style="text-align:center; color:#aaa; padding:20px;">
-                    No hay categorías disponibles.
-                </p>
-            `;
+            submenu.innerHTML = `<p style="text-align:center; color:#aaa; padding:20px;">No hay categorías disponibles.</p>`;
             return;
         }
 
@@ -311,7 +311,7 @@ function showSubmenu(category) {
         wrapper.className = "all-mega-wrapper";
         submenu.appendChild(wrapper);
 
-        // COLUMNA IZQUIERDA (categorías clickeables)
+        // Izquierda: lista de categorías
         const left = document.createElement("div");
         left.className = "all-mega-left";
         wrapper.appendChild(left);
@@ -320,63 +320,52 @@ function showSubmenu(category) {
         ul.className = "all-mega-list";
         left.appendChild(ul);
 
-        // COLUMNA DERECHA (productos dinámicos al hover)
+        // Derecha: productos al hover
         const right = document.createElement("div");
         right.className = "all-mega-right";
         wrapper.appendChild(right);
 
         allCategories.forEach(cat => {
-
-            const displayCat = 
-                cat.charAt(0).toUpperCase() +
-                cat.slice(1).replace(/-/g, " ");
+            const displayCat = cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, " ");
 
             const li = document.createElement("li");
             li.textContent = displayCat;
-
-            // ── Mejora: hacemos el <li> clickeable ────────────────────────────────
             li.style.cursor = "pointer";
             li.title = `Ver todos los productos de ${displayCat}`;
 
-            // Clic → va a la página de la categoría completa
             li.addEventListener("click", (e) => {
                 e.stopPropagation();
                 window.location.href = `category.html?cat=${encodeURIComponent(cat)}`;
             });
 
-            // Hover → muestra productos a la derecha (lo que ya tenías)
             li.onmouseenter = () => {
-                const categoryProducts = products.filter(
-                    p => normalizeString(p.category) === normalizeString(cat)
-                );
+                const categoryProducts = products.filter(p => normalizeString(p.category) === normalizeString(cat));
 
                 right.innerHTML = "";
 
                 if (categoryProducts.length === 0) {
-                    right.innerHTML = `
-                        <p style="color:#aaa;">No hay productos en esta categoría.</p>
-                    `;
+                    right.innerHTML = `<p style="color:#aaa; padding:20px;">No hay productos en "${cat}".</p>`;
                     return;
                 }
 
-                const productsGrid = document.createElement("div");
-                productsGrid.className = "all-mega-products";
-                right.appendChild(productsGrid);
+                const grid = document.createElement("div");
+                grid.className = "all-mega-products";
+                right.appendChild(grid);
 
-                // Mostramos solo algunos productos (ej: primeros 6) para no saturar
                 categoryProducts.slice(0, 6).forEach(product => {
                     const item = document.createElement("div");
                     item.className = "all-mega-product-item";
-                    item.textContent = cleanProductName(product.name);
+                    const name = cleanProductName(product.name) || product.name || 'Sin nombre';
+                    item.textContent = name;
 
                     item.onclick = () => {
                         window.location.href = `product.html?id=${product.id}`;
                     };
 
-                    productsGrid.appendChild(item);
+                    grid.appendChild(item);
                 });
 
-                // Opcional: enlace "Ver todos" debajo de los productos destacados
+                // Enlace "Ver todos"
                 const viewAll = document.createElement("a");
                 viewAll.href = `category.html?cat=${encodeURIComponent(cat)}`;
                 viewAll.textContent = "Ver todos →";
@@ -385,7 +374,7 @@ function showSubmenu(category) {
                 viewAll.style.marginTop = "12px";
                 viewAll.style.color = "var(--primary-yellow)";
                 viewAll.style.fontWeight = "bold";
-                productsGrid.appendChild(viewAll);
+                grid.appendChild(viewAll);
             };
 
             ul.appendChild(li);
@@ -394,8 +383,83 @@ function showSubmenu(category) {
         return;
     }
 
-    // ── El resto de la función (categorías normales) se mantiene igual ────────
-    // ... (tu código original para categorías específicas sigue aquí sin cambios)
+    // ── CASO 2: Categoría específica (Discos, Baterías, Cargadores, etc.) ─────
+    const categoryProducts = products.filter(p => 
+        normalizeString(p.category) === normalizeString(category)
+    );
+
+    if (categoryProducts.length === 0) {
+        submenu.innerHTML = `
+            <p style="text-align:center; color:#aaa; padding:20px;">
+                No hay productos en "${category}" aún.
+            </p>
+        `;
+        return;
+    }
+
+    // Cabecera
+    const header = document.createElement("div");
+    header.className = "submenu-header";
+    header.innerHTML = `
+        <h3 class="submenu-title">
+            ${getCategoryDisplayName(category)}
+        </h3>
+        <p class="submenu-subtitle">
+            ${categoryProducts.length} productos disponibles
+        </p>
+    `;
+    submenu.appendChild(header);
+
+    // Contenedor de columnas
+    const columnsContainer = document.createElement("div");
+    columnsContainer.className = "submenu-columns-container";
+    submenu.appendChild(columnsContainer);
+
+    // Número de columnas según cantidad de productos
+    let columns = 1;
+    if (categoryProducts.length > 12) columns = 4;
+    else if (categoryProducts.length > 8) columns = 3;
+    else if (categoryProducts.length > 4) columns = 2;
+
+    // Crear columnas
+    for (let i = 0; i < columns; i++) {
+        const column = document.createElement("div");
+        column.className = "submenu-column";
+
+        const ul = document.createElement("ul");
+        ul.className = "submenu-list";
+
+        column.appendChild(ul);
+        columnsContainer.appendChild(column);
+    }
+
+    // Distribuir productos
+    const columnLists = columnsContainer.querySelectorAll(".submenu-list");
+    const productsPerColumn = Math.ceil(categoryProducts.length / columns);
+
+    columnLists.forEach((ul, colIndex) => {
+        const start = colIndex * productsPerColumn;
+        const end = Math.min(start + productsPerColumn, categoryProducts.length);
+
+        categoryProducts.slice(start, end).forEach(product => {
+            const cleanName = cleanProductName(product.name) || product.name || 'Sin nombre';
+
+            const li = document.createElement("li");
+            li.className = "submenu-product-item";
+
+            li.innerHTML = `
+                <div class="product-name" title="${escapeHtml(product.name)}">
+                    ${escapeHtml(cleanName)}
+                </div>
+            `;
+
+            li.onclick = () => {
+                window.location.href = `product.html?id=${product.id}`;
+            };
+
+            ul.appendChild(li);
+        });
+    });
 }
 
 
