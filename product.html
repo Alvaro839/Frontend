@@ -3,63 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Producto - TWINS TECH</title>
-    <link rel="stylesheet" href="styles.css?v=20260228">
+    <title id="pageTitle">Producto - TWINS TECH</title>
+    <link rel="stylesheet" href="styles.css?v=20260228g">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- Header dinámico -->
+    <!-- Header dinámico - BLINDADO TOTAL (chequea top-bar + header + categorías) -->
     <script>
-        fetch('header.html')
-            .then(response => response.text())
-            .then(data => {
-                document.body.insertAdjacentHTML('afterbegin', data);
-                
+        (function loadHeaderSafely() {
+            // Chequeo completo de todas las partes del header
+            const headerParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+            const countBefore = headerParts.length;
+
+            console.log(`[product] Chequeo inicial: ${countBefore} partes de header`);
+
+            if (countBefore >= 3) {  // top-bar + main-header + categories ≈ 3
+                console.log(`[product] Header YA completo (${countBefore}) → NO fetch`);
                 setTimeout(() => {
-                    if (typeof updateCart === 'function') {
-                        updateCart();
-                        console.log('✅ Contador carrito actualizado después de cargar header (product.html)');
+                    if (typeof updateCart === 'function') updateCart();
+                }, 150);
+                return;
+            }
+
+            console.log('[product] No hay header completo → fetch');
+
+            fetch('header.html?v=20260228g')
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return response.text();
+                })
+                .then(data => {
+                    // Chequeo justo antes de insertar
+                    const currentCount = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                    if (currentCount >= 3) {
+                        console.warn(`[product] Header apareció durante fetch (${currentCount}) → abort`);
+                        return;
                     }
-                }, 300);
-            })
-            .catch(err => console.error('Error cargando header:', err));
+
+                    console.log('[product] Insertando header...');
+                    document.body.insertAdjacentHTML('afterbegin', data);
+
+                    const countAfter = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                    console.log(`[product] Partes después de insertar: ${countAfter}`);
+
+                    // Limpieza automática si hay duplicados
+                    if (countAfter > 3) {
+                        console.error('[product] ¡DUPLICADOS DETECTADOS! Limpiando extras...');
+                        const allParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+                        const keepers = new Set();
+                        for (let el of allParts) {
+                            const key = el.className.trim();
+                            if (keepers.has(key)) {
+                                el.remove();
+                                console.log('[product] Eliminado duplicado:', key);
+                            } else {
+                                keepers.add(key);
+                            }
+                        }
+                    }
+
+                    setTimeout(() => {
+                        if (typeof updateCart === 'function') updateCart();
+                    }, 400);
+                })
+                .catch(err => console.error('[product] Error fetch header:', err));
+        })();
     </script>
 
-    <!-- Contenido del producto (asumiendo tu estructura) -->
+    <!-- Modal para zoom de imagen -->
+<div id="imageModal" class="image-modal">
+    <div class="modal-content-wrapper">
+        <span class="close-modal" id="closeModalBtn">
+            <i class="fas fa-times"></i>
+        </span>
+        <img class="modal-content" id="modalImage">
+    </div>
+</div>
+
+    <!-- Contenido del producto -->
     <main class="product-detail">
         <div class="product-detail-container">
-            <div class="product-image-section">
-                <img id="productImage" src="" alt="Producto">
+            <!-- Imagen principal (izquierda, centrada) -->
+            <div class="product-image-wrapper">
+                <img id="productImage" src="" alt="Producto" loading="lazy">
             </div>
-            <div class="product-info-section">
+
+            <!-- Info principal (derecha) -->
+            <div class="product-info-wrapper">
                 <h1 id="productTitle">Cargando...</h1>
-                <div class="product-price-box">
-                    <p id="productPrice">Cargando...</p>
+
+                <div class="product-price">
+                    <p id="productPrice" class="price-large">Cargando...</p>
                 </div>
-                <button onclick="addToCartFromUrl()">Añadir al Carrito</button>
-                <a id="whatsappProductLink" href="#">Consultar por WhatsApp</a>
-            </div>
-            <div class="product-specs-section">
-                <h2>Descripción</h2>
-                <div id="productSpecs">Cargando...</div>
-            </div>
-            <div class="recommended-section">
-                <h2>Productos Recomendados</h2>
-                <div id="recommendedProducts"></div>
+
+                <div class="product-buttons">
+                    <button class="btn-add-cart" onclick="addToCartFromUrl()">
+                        <i class="fas fa-cart-plus"></i> Añadir al Carrito
+                    </button>
+                    <a id="whatsappProductLink" href="#" class="btn-whatsapp" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Consultar por WhatsApp
+                    </a>
+                </div>
             </div>
         </div>
+
+        <!-- Descripción -->
+        <section class="product-description-section">
+            <h2>Descripción del Producto</h2>
+            <div id="productSpecs" class="product-description">
+                Cargando descripción...
+            </div>
+        </section>
+
+        <!-- Recomendados -->
+        <section class="recommended-section">
+            <h2>Productos Recomendados</h2>
+            <div class="recommended-grid" id="recommendedProducts"></div>
+        </section>
     </main>
 
-    <!-- Script principal -->
-    <script src="script.js?v=20260228"></script>
+    <!-- Footer -->
+    <div id="footer-container"></div>
 
+    <!-- Script principal -->
+    <script src="script.js?v=20260228f"></script>
+
+    <!-- Lógica del producto -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
-            if (id) showProductDetails(id);
+            const idParam = urlParams.get('id');
+
+            if (!idParam) return showError("No se proporcionó ID");
+
+            const id = Number(idParam);
+            if (isNaN(id)) return showError("ID inválido");
+
+            function tryLoadProduct() {
+                if (!products || products.length === 0) {
+                    setTimeout(tryLoadProduct, 500);
+                    return;
+                }
+
+                const product = products.find(p => Number(p.id) === id);
+                if (!product) return showError(`Producto con ID ${id} no encontrado`);
+
+                document.getElementById('productContent')?.classList.remove('hidden');
+                document.querySelector('.product-detail-container.skeleton')?.remove();
+
+                document.getElementById('pageTitle').textContent = `${product.name} - TWINS TECH`;
+
+                const imgEl = document.getElementById('productImage');
+                imgEl.src = getImageUrl(product.imagen);
+                imgEl.alt = product.name;
+                imgEl.onerror = () => imgEl.src = 'https://placehold.co/600x600?text=Sin+Imagen';
+
+             
+// Zoom profesional
+imgEl.addEventListener('click', () => {
+    openModal(imgEl.src);
+});
+
+                document.getElementById('productTitle').textContent = product.name || 'Sin nombre';
+
+                document.getElementById('productPrice').textContent = product.price 
+                    ? `${product.price} USD` 
+                    : 'Precio no disponible';
+
+                document.getElementById('productSpecs').innerHTML = product.description 
+                    ? `<p>${product.description}</p>` 
+                    : '<p>No hay descripción disponible.</p>';
+
+                const waLink = document.getElementById('whatsappProductLink');
+                if (waLink) {
+                    const msg = encodeURIComponent(`Hola Twins Tech! Estoy interesado en ${product.name}. ¿Me das más info?`);
+                    waLink.href = `https://wa.me/933488495?text=${msg}`;
+                }
+
+                const recContainer = document.getElementById('recommendedProducts');
+                recContainer.innerHTML = '';
+                const recommended = products
+                    .filter(p => p.category === product.category && Number(p.id) !== id)
+                    .slice(0, 6);
+
+                if (recommended.length === 0) {
+                    recContainer.innerHTML = '<p style="text-align:center; color:#888;">No hay recomendaciones disponibles.</p>';
+                } else {
+                    recommended.forEach(rec => {
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+                        card.innerHTML = `
+                            <img src="${getImageUrl(rec.imagen)}" alt="${rec.name}" loading="lazy">
+                            <h3>${rec.name}</h3>
+                            <p class="price">${rec.price ? rec.price + ' USD' : '—'}</p>
+                        `;
+                        card.onclick = () => window.location.href = `product.html?id=${rec.id}`;
+                        recContainer.appendChild(card);
+                    });
+                }
+            }
+
+            tryLoadProduct();
         });
+
+        function showError(msg) {
+            document.getElementById('productContent').innerHTML = `
+                <div style="text-align:center; padding:80px 20px; max-width:800px; margin:0 auto;">
+                    <h2>Error</h2>
+                    <p>${msg}</p>
+                    <a href="index.html" class="btn">Volver a la tienda</a>
+                </div>
+            `;
+            document.getElementById('productContent').classList.remove('hidden');
+        }
+
+        function addToCartFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = Number(urlParams.get('id'));
+            if (!isNaN(id)) addToCart(id);
+
+
+        }
+        /* =====================================================
+   MODAL SYSTEM – ENTERPRISE VERSION
+===================================================== */
+
+function openModal(src) {
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+
+    modalImg.src = src;
+    modal.classList.add('active');
+    document.body.classList.add('modal-open');
+}
+
+function closeModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+}
+
+// Botón X
+document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+// Click fuera de la imagen
+document.getElementById('imageModal').addEventListener('click', (e) => {
+    if (e.target.id === 'imageModal') {
+        closeModal();
+    }
+});
+
+// ESC para cerrar
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
     </script>
 
+    <!-- CSS adicional (mueve a styles.css cuando puedas) -->
+    <style>
+       /* ======================================================
+   PRODUCT DETAIL – ENTERPRISE VERSION (MOBILE FIRST)
+====================================================== */
+
+/* ----------------------------
+   VARIABLES BASE
+---------------------------- */
+
+:root {
+    --max-width: 1240px;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+
+    --shadow-soft: 0 10px 30px rgba(0,0,0,0.08);
+    --shadow-medium: 0 25px 60px rgba(0,0,0,0.12);
+
+    --bg-light: #f8f9fb;
+    --text-main: #111;
+    --text-muted: #666;
+}
+
+/* ======================================================
+   WRAPPER
+====================================================== */
+
+.product-detail {
+    padding: 30px 18px;
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+/* ======================================================
+   MAIN CONTAINER
+====================================================== */
+
+.product-detail-container {
+    display: grid;
+    gap: 40px;
+    background: #ffffff;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 24px;
+}
+
+/* Desktop layout */
+@media (min-width: 992px) {
+    .product-detail-container {
+        grid-template-columns: 1fr 1fr;
+        padding: 48px;
+    }
+}
+
+/* ======================================================
+   IMAGE SECTION
+====================================================== */
+
+.product-image-wrapper {
+    background: var(--bg-light);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    overflow: hidden;
+}
+
+.product-image-wrapper img {
+    max-width: 100%;
+    max-height: 480px;
+    object-fit: contain;
+    transition: transform 0.4s cubic-bezier(.16,1,.3,1);
+    cursor: zoom-in;
+}
+
+.product-image-wrapper img:hover {
+    transform: scale(1.04);
+}
+
+/* ======================================================
+   INFO SECTION
+====================================================== */
+
+.product-info-wrapper h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+@media (min-width: 992px) {
+    .product-info-wrapper h1 {
+        font-size: 2.4rem;
+    }
+}
+
+/* PRICE */
+
+.product-price {
+    margin: 18px 0 30px;
+}
+
+.price-large {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--primary-yellow);
+}
+
+@media (min-width: 992px) {
+    .price-large {
+        font-size: 2.8rem;
+    }
+}
+
+/* ======================================================
+   BUTTONS
+====================================================== */
+
+.product-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+@media (min-width: 600px) {
+    .product-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+
+.btn-add-cart,
+.btn-whatsapp {
+    flex: 1;
+    padding: 16px 22px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.25s ease;
+    text-align: center;
+}
+
+/* Add to cart */
+.btn-add-cart {
+    background: var(--primary-yellow);
+    color: #000;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-add-cart:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* WhatsApp */
+.btn-whatsapp {
+    background: #25D366;
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-whatsapp:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* ======================================================
+   DESCRIPTION
+====================================================== */
+
+.product-description-section {
+    margin: 60px 0;
+    padding: 28px;
+    background: var(--bg-light);
+    border-radius: var(--radius-lg);
+}
+
+@media (min-width: 992px) {
+    .product-description-section {
+        padding: 50px;
+    }
+}
+
+.product-description {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text-muted);
+}
+
+/* ======================================================
+   RECOMMENDED
+====================================================== */
+
+.recommended-section {
+    margin-top: 70px;
+}
+
+.recommended-section h2 {
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+}
+
+.recommended-grid {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+/* ======================================================
+   IMAGE MODAL – CLEAN ENTERPRISE
+====================================================== */
+
+/* ==============================
+   MODAL – ANIMATED PREMIUM
+============================== */
+
+.image-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.97);
+    backdrop-filter: blur(10px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 99999;
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease;
+}
+
+.image-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Wrapper ocupa pantalla completa */
+.modal-content-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* IMAGEN CON ANIMACIÓN */
+.modal-content {
+    max-width: 95%;
+    max-height: 85vh;
+    object-fit: contain;
+
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+
+    transition:
+        transform 0.4s cubic-bezier(.16,1,.3,1),
+        opacity 0.3s ease;
+}
+
+/* Cuando el modal está activo */
+.image-modal.active .modal-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* BOTÓN CERRAR */
+.close-modal {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+
+    width: 44px;
+    height: 44px;
+
+    border-radius: 50%;
+    background: white;
+    color: black;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+    cursor: pointer;
+
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease;
+}
+
+.close-modal:hover {
+    transform: scale(1.1);
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+    </style>
 </body>
 </html>

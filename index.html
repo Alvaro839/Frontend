@@ -4,76 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TWINS TECH - Tienda de Hardware Tecnológico</title>
-    <link rel="stylesheet" href="styles.css?v=20260228d">
+    <!-- Versión para romper caché -->
+    <link rel="stylesheet" href="styles.css?v=20260228f">
 </head>
 <body>
 
-    <!-- Header dinámico - con limpieza automática de duplicados -->
+    <!-- Header dinámico - BLINDADO TOTAL (chequea top-bar + header + categorías) -->
     <script>
         (function loadHeaderSafely() {
-            // Selector completo para capturar top-bar + header + nav
-            const headerElements = document.querySelectorAll('.top-bar, .main-header, .categories');
+            // Selector que cubre TODAS las partes del header
+            const headerParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+            const countBefore = headerParts.length;
 
-            if (headerElements.length > 0) {
-                console.log(`🛡️ Elementos de header ya existen (${headerElements.length}) → skip fetch`);
+            console.log(`[index] Chequeo inicial: ${countBefore} partes de header encontradas`);
+
+            if (countBefore >= 3) {  // top-bar + main-header + categories ≈ 3
+                console.log(`[index] Header YA completo (${countBefore}) → NO fetch`);
                 setTimeout(() => {
                     if (typeof updateCart === 'function') updateCart();
                 }, 150);
                 return;
             }
 
-            console.log('🟢 No hay elementos de header → fetch');
+            console.log('[index] No hay header completo → iniciando fetch');
 
-            fetch('header.html?v=20260228d')
+            fetch('header.html?v=20260228f')
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.text();
                 })
                 .then(data => {
-                    if (document.querySelectorAll('.top-bar, .main-header, .categories').length > 0) {
-                        console.warn('⚠️ Header apareció durante fetch → abort');
+                    // Chequeo justo antes de insertar
+                    const currentCount = document.querySelectorAll('.top-bar, .main-header, .categories').length;
+                    if (currentCount >= 3) {
+                        console.warn(`[index] Header apareció durante fetch (${currentCount}) → abort`);
                         return;
                     }
 
+                    console.log('[index] Insertando header...');
                     document.body.insertAdjacentHTML('afterbegin', data);
 
                     const countAfter = document.querySelectorAll('.top-bar, .main-header, .categories').length;
-                    console.log(`Elementos después de insertar: ${countAfter}`);
+                    console.log(`[index] Partes después de insertar: ${countAfter}`);
 
                     // Limpieza automática si hay duplicados
-                    if (countAfter > 3) {  // top-bar + header + nav = ~3
-                        console.error('¡DUPLICADOS DETECTADOS! Limpiando extras...');
-                        const all = document.querySelectorAll('.top-bar, .main-header, .categories');
-                        for (let i = 3; i < all.length; i++) {  // deja los primeros 3
-                            all[i].remove();
-                            console.log('Eliminado duplicado:', all[i].outerHTML.substring(0, 100) + '...');
+                    if (countAfter > 3) {
+                        console.error('[index] ¡DUPLICADOS DETECTADOS! Limpiando extras...');
+                        const allParts = document.querySelectorAll('.top-bar, .main-header, .categories');
+                        
+                        // Dejamos solo la primera ocurrencia de cada tipo
+                        const keepers = new Set();
+                        for (let el of allParts) {
+                            const key = el.className.trim();
+                            if (keepers.has(key)) {
+                                el.remove();
+                                console.log('[index] Eliminado duplicado:', key);
+                            } else {
+                                keepers.add(key);
+                            }
                         }
                     }
 
+                    // Actualizamos carrito
                     setTimeout(() => {
                         if (typeof updateCart === 'function') {
                             updateCart();
-                            console.log('✅ Carrito actualizado post-inserción');
+                            console.log('[index] ✅ Contador carrito actualizado post-inserción');
                         }
                     }, 400);
                 })
-                .catch(err => console.error('Error fetch header:', err));
+                .catch(err => console.error('[index] Error fetch header:', err));
         })();
     </script>
 
-    <!-- Resto de tu página (carrusel, productos, etc.) -->
+    <!-- Carrusel horizontal de anuncios - RESTAURADO -->
     <section class="horizontal-ads-carousel">
-        <!-- ... -->
+        <div class="carousel-container">
+            <button class="carousel-arrow prev" onclick="moveHorizontalAds(-1)">❮</button>
+
+            <div class="carousel-track" id="horizontalAdsTrack">
+                <div class="carousel-loading">Cargando anuncios...</div>
+            </div>
+
+            <button class="carousel-arrow next" onclick="moveHorizontalAds(1)">❯</button>
+        </div>
+
+        <div class="carousel-indicators" id="horizontalAdsIndicators"></div>
     </section>
 
+    <!-- Sección de Productos -->
     <section class="products-container">
         <div id="productsSection"></div>
     </section>
 
+    <!-- Anuncio lateral (opcional) -->
     <div class="side-ad">
-        <!-- ... -->
+        <!-- Contenido del anuncio lateral -->
+        <button class="close-ad" onclick="this.parentElement.style.display='none'">×</button>
     </div>
 
-    <script src="script.js?v=20260228d"></script>
+    <!-- Scripts -->
+    <script src="script.js?v=20260228f"></script>
+
+    <!-- Llamada explícita al carrusel -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof cargarAnuncios === 'function') {
+                cargarAnuncios();
+            } else {
+                console.error('Función cargarAnuncios no encontrada');
+            }
+        });
+    </script>
+
 </body>
 </html>
