@@ -286,121 +286,185 @@ function showSubmenu(category) {
     const submenu = document.getElementById('submenu');
     if (!submenu) return;
 
+    // Esperar productos si aún no cargan
     if (!products || products.length === 0) {
         console.warn("Productos no cargados aún. Reintentando...");
         setTimeout(() => showSubmenu(category), 300);
         return;
     }
 
+    // Limpiar contenido anterior
     submenu.innerHTML = "";
     submenu.removeAttribute("style");
     submenu.classList.add("active");
 
     /* =========================================================
-       CASO: TODAS LAS CATEGORÍAS  ←─ AQUÍ ESTÁ EL CAMBIO PRINCIPAL
+       CASO: TODAS LAS CATEGORÍAS (EDITADO)
     ========================================================= */
     if (category === "all") {
 
-        const allCategories = [...new Set(products.map(p => p.category))];
+    const allCategories = [...new Set(products.map(p => p.category))];
 
-        if (allCategories.length === 0) {
-            submenu.innerHTML = `
-                <p style="text-align:center; color:#aaa; padding:20px;">
-                    No hay categorías disponibles.
-                </p>
-            `;
-            return;
-        }
+    if (allCategories.length === 0) {
+        submenu.innerHTML = `
+            <p style="text-align:center; color:#aaa; padding:20px;">
+                No hay categorías disponibles.
+            </p>
+        `;
+        return;
+    }
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "all-mega-wrapper";
-        submenu.appendChild(wrapper);
+    // 🔥 Contenedor principal en 2 columnas
+    const wrapper = document.createElement("div");
+    wrapper.className = "all-mega-wrapper";
+    submenu.appendChild(wrapper);
 
-        // COLUMNA IZQUIERDA (categorías clickeables)
-        const left = document.createElement("div");
-        left.className = "all-mega-left";
-        wrapper.appendChild(left);
+    // COLUMNA IZQUIERDA (categorías)
+    const left = document.createElement("div");
+    left.className = "all-mega-left";
+    wrapper.appendChild(left);
+
+    const ul = document.createElement("ul");
+    ul.className = "all-mega-list";
+    left.appendChild(ul);
+
+    // COLUMNA DERECHA (productos dinámicos)
+    const right = document.createElement("div");
+    right.className = "all-mega-right";
+    wrapper.appendChild(right);
+
+    allCategories.forEach(cat => {
+
+        const displayCat =
+            cat.charAt(0).toUpperCase() +
+            cat.slice(1).replace(/-/g, " ");
+
+        const li = document.createElement("li");
+        li.textContent = displayCat;
+
+        li.onmouseenter = () => {
+
+            const categoryProducts = products.filter(
+                p => normalizeString(p.category) === normalizeString(cat)
+            );
+
+            right.innerHTML = "";
+
+            if (categoryProducts.length === 0) {
+                right.innerHTML = `
+                    <p style="color:#aaa;">No hay productos en esta categoría.</p>
+                `;
+                return;
+            }
+
+            const productsGrid = document.createElement("div");
+            productsGrid.className = "all-mega-products";
+            right.appendChild(productsGrid);
+
+            categoryProducts.forEach(product => {
+
+                const item = document.createElement("div");
+                item.className = "all-mega-product-item";
+                item.textContent = cleanProductName(product.name);
+
+                item.onclick = () => {
+                    window.location.href = `product.html?id=${product.id}`;
+                };
+
+                productsGrid.appendChild(item);
+            });
+        };
+
+        ul.appendChild(li);
+    });
+
+    return;
+}
+
+
+    /* =========================================================
+       CASO: CATEGORÍA NORMAL (NO SE TOCA)
+    ========================================================= */
+
+    const categoryProducts = products.filter(
+        p => normalizeString(p.category) === normalizeString(category)
+    );
+
+    if (categoryProducts.length === 0) {
+        submenu.innerHTML = `
+            <p style="text-align:center; color:#aaa; padding:20px;">
+                No hay productos en esta categoría aún.
+            </p>
+        `;
+        return;
+    }
+
+    const header = document.createElement("div");
+    header.className = "submenu-header";
+    header.innerHTML = `
+        <h3 class="submenu-title">
+            ${getCategoryDisplayName(category)}
+        </h3>
+        <p class="submenu-subtitle">
+            ${categoryProducts.length} productos en stock •
+            
+        </p>
+    `;
+    submenu.appendChild(header);
+
+    const columnsContainer = document.createElement("div");
+    columnsContainer.className = "submenu-columns-container";
+    submenu.appendChild(columnsContainer);
+
+    let columns = 1;
+    if (categoryProducts.length > 12) columns = 4;
+    else if (categoryProducts.length > 8) columns = 3;
+    else if (categoryProducts.length > 4) columns = 2;
+
+    for (let i = 0; i < columns; i++) {
+        const column = document.createElement("div");
+        column.className = "submenu-column";
 
         const ul = document.createElement("ul");
-        ul.className = "all-mega-list";
-        left.appendChild(ul);
+        ul.className = "submenu-list";
 
-        // COLUMNA DERECHA (productos dinámicos al hover)
-        const right = document.createElement("div");
-        right.className = "all-mega-right";
-        wrapper.appendChild(right);
+        column.appendChild(ul);
+        columnsContainer.appendChild(column);
+    }
 
-        allCategories.forEach(cat => {
+    const columnLists = columnsContainer.querySelectorAll(".submenu-list");
+    const productsPerColumn = Math.ceil(categoryProducts.length / columns);
 
-            const displayCat = 
-                cat.charAt(0).toUpperCase() +
-                cat.slice(1).replace(/-/g, " ");
+    columnLists.forEach((ul, colIndex) => {
+        const start = colIndex * productsPerColumn;
+        const end = start + productsPerColumn;
+
+        categoryProducts.slice(start, end).forEach(product => {
+
+            const cleanName = cleanProductName(product.name);
 
             const li = document.createElement("li");
-            li.textContent = displayCat;
+            li.className = "submenu-product-item";
 
-            // ── Mejora: hacemos el <li> clickeable ────────────────────────────────
-            li.style.cursor = "pointer";
-            li.title = `Ver todos los productos de ${displayCat}`;
+            li.innerHTML = `
+                <div class="product-content">
+                    <div class="product-name" title="${escapeHtml(product.name)}">
+                        ${escapeHtml(cleanName)}
+                    </div>
+                    <div class="product-action">
+                        
+                    </div>
+                </div>
+            `;
 
-            // Clic → va a la página de la categoría completa
-            li.addEventListener("click", (e) => {
+            li.onclick = (e) => {
                 e.stopPropagation();
-                window.location.href = `category.html?cat=${encodeURIComponent(cat)}`;
-            });
-
-            // Hover → muestra productos a la derecha (lo que ya tenías)
-            li.onmouseenter = () => {
-                const categoryProducts = products.filter(
-                    p => normalizeString(p.category) === normalizeString(cat)
-                );
-
-                right.innerHTML = "";
-
-                if (categoryProducts.length === 0) {
-                    right.innerHTML = `
-                        <p style="color:#aaa;">No hay productos en esta categoría.</p>
-                    `;
-                    return;
-                }
-
-                const productsGrid = document.createElement("div");
-                productsGrid.className = "all-mega-products";
-                right.appendChild(productsGrid);
-
-                // Mostramos solo algunos productos (ej: primeros 6) para no saturar
-                categoryProducts.slice(0, 6).forEach(product => {
-                    const item = document.createElement("div");
-                    item.className = "all-mega-product-item";
-                    item.textContent = cleanProductName(product.name);
-
-                    item.onclick = () => {
-                        window.location.href = `product.html?id=${product.id}`;
-                    };
-
-                    productsGrid.appendChild(item);
-                });
-
-                // Opcional: enlace "Ver todos" debajo de los productos destacados
-                const viewAll = document.createElement("a");
-                viewAll.href = `category.html?cat=${encodeURIComponent(cat)}`;
-                viewAll.textContent = "Ver todos →";
-                viewAll.className = "view-all-link";
-                viewAll.style.display = "block";
-                viewAll.style.marginTop = "12px";
-                viewAll.style.color = "var(--primary-yellow)";
-                viewAll.style.fontWeight = "bold";
-                productsGrid.appendChild(viewAll);
+                window.location.href = `product.html?id=${product.id}`;
             };
 
             ul.appendChild(li);
         });
-
-        return;
-    }
-
-    // ── El resto de la función (categorías normales) se mantiene igual ────────
-    // ... (tu código original para categorías específicas sigue aquí sin cambios)
+    });
 }
 
 
@@ -1390,31 +1454,3 @@ window.addEventListener('load', () => {
 });
 
 
-function updateCart() {
-    const cartCountElement = document.getElementById('cartCount');
-    
-    // Si el elemento no existe aún (header no cargado), salimos sin error
-    if (!cartCountElement) {
-        console.log('Elemento #cartCount no encontrado aún (header pendiente)');
-        return;
-    }
-
-    const cart = getCart();
-    
-    // Seguridad extra por si localStorage está corrupto
-    if (!Array.isArray(cart)) {
-        console.warn('Carrito corrupto → reiniciando');
-        saveCart([]);
-        cartCountElement.textContent = '0';
-        return;
-    }
-
-    const totalItems = cart.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
-    
-    cartCountElement.textContent = totalItems;
-    
-    // Opcional: ocultar si es 0
-    cartCountElement.style.display = totalItems > 0 ? 'flex' : 'none';
-
-    console.log(`Carrito actualizado: ${totalItems} artículos`);
-}
