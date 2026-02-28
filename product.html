@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categoría - TWINS TECH</title>
-    <!-- Agregamos ?v= para evitar caché del navegador -->
-    <link rel="stylesheet" href="styles.css?v=20260227">
+    <title>Producto - TWINS TECH</title>
+    <link rel="stylesheet" href="styles.css?v=20260228">
 </head>
 <body>
 
@@ -13,105 +12,54 @@
     <script>
         fetch('header.html')
             .then(response => response.text())
-            .then(data => document.body.insertAdjacentHTML('afterbegin', data))
+            .then(data => {
+                document.body.insertAdjacentHTML('afterbegin', data);
+                
+                setTimeout(() => {
+                    if (typeof updateCart === 'function') {
+                        updateCart();
+                        console.log('✅ Contador carrito actualizado después de cargar header (product.html)');
+                    }
+                }, 300);
+            })
             .catch(err => console.error('Error cargando header:', err));
     </script>
 
-    <main class="category-page">
-        <div class="category-container">
-            
-            <!-- Sidebar solo para Desktop -->
-            <aside class="filters-sidebar desktop-only">
-                <h3>Categorías</h3>
-                <ul class="category-filter-list" id="categoryFilterList"></ul>
-
-                <h3>Filtro por Precio</h3>
-                <div class="price-filter-box">
-                    <h4>Rango de precio</h4>
-                    <div class="price-inputs">
-                        <input type="number" id="minPrice" placeholder="Mínimo" />
-                        <input type="number" id="maxPrice" placeholder="Máximo" />
-                    </div>
-                    <button id="applyFilters">Aplicar filtros</button>
-                </div>
-            </aside>
-
-            <!-- Versión Móvil - Botón bonito centrado -->
-            <div class="mobile-filters">
-                <div class="mobile-filter-header" id="mobileCategoryHeader">
-                    <span class="header-text">Filtros y Categorías</span>
-                    <span class="toggle-arrow">▼</span>
-                </div>
-                <div class="mobile-filter-content" id="mobileCategoryContent">
-                    <h4>Categorías</h4>
-                    <ul class="category-filter-list" id="categoryFilterListMobile"></ul>
-
-                    <h4>Filtro por Precio</h4>
-                    <div class="price-filter-box">
-                        <div class="price-inputs">
-                            <input type="number" id="mobileMinPrice" placeholder="Mínimo" />
-                            <input type="number" id="mobileMaxPrice" placeholder="Máximo" />
-                        </div>
-                        <button id="mobileApplyFilters">Aplicar filtros</button>
-                    </div>
-                </div>
+    <!-- Contenido del producto (asumiendo tu estructura) -->
+    <main class="product-detail">
+        <div class="product-detail-container">
+            <div class="product-image-section">
+                <img id="productImage" src="" alt="Producto">
             </div>
-
-            <!-- Productos -->
-            <section class="products-section">
-                <div class="category-header">
-                    <h1 id="categoryTitle">Categoría</h1>
-                    <p id="resultCount">Mostrando 0 productos</p>
+            <div class="product-info-section">
+                <h1 id="productTitle">Cargando...</h1>
+                <div class="product-price-box">
+                    <p id="productPrice">Cargando...</p>
                 </div>
-
-                <div class="products-grid" id="productsSection"></div>
-            </section>
+                <button onclick="addToCartFromUrl()">Añadir al Carrito</button>
+                <a id="whatsappProductLink" href="#">Consultar por WhatsApp</a>
+            </div>
+            <div class="product-specs-section">
+                <h2>Descripción</h2>
+                <div id="productSpecs">Cargando...</div>
+            </div>
+            <div class="recommended-section">
+                <h2>Productos Recomendados</h2>
+                <div id="recommendedProducts"></div>
+            </div>
         </div>
     </main>
 
-    <!-- Script principal - con anti-caché -->
-    <script src="script.js?v=20260227"></script>
+    <!-- Script principal -->
+    <script src="script.js?v=20260228"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const cat = urlParams.get('cat') || 'all';
-
-            // Cargar filtros y productos
-            loadCategoryFilters();
-            loadCategoryProducts(cat);
-
-            // Copiar categorías al móvil (solo una vez)
-            setTimeout(() => {
-                const desktopList = document.getElementById('categoryFilterList');
-                const mobileList = document.getElementById('categoryFilterListMobile');
-                if (desktopList && mobileList) {
-                    mobileList.innerHTML = desktopList.innerHTML;
-                }
-            }, 600);
-
-            // Collapsible móvil
-            const header = document.getElementById('mobileCategoryHeader');
-            const content = document.getElementById('mobileCategoryContent');
-            const arrow = header.querySelector('.toggle-arrow');
-
-            if (header && content && arrow) {
-                header.addEventListener('click', () => {
-                    content.classList.toggle('show');
-                    arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
-                });
-            }
-
-            // Aplicar filtros desde móvil (sincroniza con desktop)
-            const mobileApplyBtn = document.getElementById('mobileApplyFilters');
-            if (mobileApplyBtn) {
-                mobileApplyBtn.addEventListener('click', () => {
-                    document.getElementById('minPrice').value = document.getElementById('mobileMinPrice').value || '';
-                    document.getElementById('maxPrice').value = document.getElementById('mobileMaxPrice').value || '';
-                    loadCategoryProducts(cat);
-                });
-            }
+            const id = urlParams.get('id');
+            if (id) showProductDetails(id);
         });
     </script>
+
 </body>
 </html>

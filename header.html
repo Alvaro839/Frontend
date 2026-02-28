@@ -87,12 +87,101 @@
 </nav>
 
 <!-- Scripts del header -->
+<!-- header.html -->
+<!-- Top bar superior negra -->
+<div class="top-bar">
+    <div class="top-bar-content">
+        <div class="contact-info">
+            <span><a href="https://wa.me/933488495" target="_blank">933 488 495</a></span>
+            <span><a href="mailto:ventas@twins-tech.pe">ventas@twins-tech.pe</a></span>
+            
+            <a href="https://www.google.com/maps?ll=-12.055367,-77.038038&z=15&t=m&hl=es&gl=PE&mapclient=embed&q=Jr.+Caman%C3%A1+1166+Lima+15001" 
+               class="direccion-link" 
+               title="Ver ubicación en mapa" 
+               target="_blank" 
+               rel="noopener noreferrer">
+               Jr. Cañamá 1166, Cercado de Lima
+            </a>
+        </div>
+
+        <div class="social-links">
+            <a href="https://www.facebook.com/twinstechimport" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook" class="social-icon">
+            </a>
+            <a href="https://www.instagram.com/twinstechimport" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" alt="Instagram" class="social-icon">
+            </a>
+            <a href="https://wa.me/933488495" target="_blank">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="social-icon">
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Header principal (oscuro) -->
+<header class="main-header dark-header">
+    <div class="header-top">
+        <!-- Logo -->
+        <div class="logo">
+            <a href="index.html">
+                <img src="img/Logos/TwinsTech.jpeg" alt="TWINS TECH" class="logo-img">
+            </a>
+        </div>
+
+        <!-- Buscador - Mejorado con <form> -->
+        <div class="search-container">
+            <form id="searchForm" class="search-form" action="javascript:void(0);">
+                <div class="search-input-wrapper">
+                    <input 
+                        type="search" 
+                        id="searchInput" 
+                        name="q" 
+                        placeholder="Buscar productos..." 
+                        autocomplete="off"
+                        aria-label="Buscar productos en Twins Tech"
+                    >
+                    <button type="submit" class="search-btn" aria-label="Realizar búsqueda">
+                        Buscar
+                    </button>
+                </div>
+            </form>
+            <div id="searchSuggestions" class="search-suggestions"></div>
+        </div>
+
+        <!-- Carrito con contador -->
+        <div class="cart">
+            <a href="cart.html" class="cart-link" aria-label="Ver carrito de compras">
+                🛒
+                <span id="cartCount" class="cart-count">0</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Menú de categorías -->
+<nav class="categories">
+    <ul id="categoryMenu">
+        <li data-category="all">Todas las categorias</li>
+        <li data-category="discos">Discos</li>
+        <li data-category="mouses">Mouses</li>
+        <li data-category="teclados-mouses">Teclados-Mouses</li>
+        <li data-category="teclados">Teclados</li>
+        <li data-category="adaptadores">Adaptadores</li>
+        <li data-category="baterias">Baterías</li>
+        <li data-category="cargadores">Cargadores</li>
+        <li data-category="impresoras">Impresoras</li>
+    </ul>
+
+    <div id="submenu" class="submenu"></div>
+</nav>
+
+<!-- Scripts del header -->
 <script>
     // IIFE para inicialización del header
     (function initHeader() {
         // Esperamos un poco para que el DOM esté listo y las funciones externas existan
         setTimeout(() => {
-            // 1. Inicialización del menú de categorías (lo que ya tenías)
+            // 1. Inicialización del menú de categorías
             const menuItems = document.querySelectorAll('#categoryMenu li[data-category]');
             const submenu = document.getElementById('submenu');
 
@@ -124,31 +213,47 @@
 
             console.log('✅ Menú de categorías inicializado');
 
-            // 2. Manejo del carrito (lo que ya tenías)
+            // 2. Manejo del carrito (versión robusta con reintentos)
             function tryUpdateCart() {
                 if (typeof updateCart === 'function') {
                     updateCart();
-                    console.log('✅ Contador de carrito actualizado');
-                    return;
+                    console.log('✅ Contador de carrito actualizado (intento inmediato desde header)');
+                    return true;
                 }
 
                 let attempts = 0;
+                const maxAttempts = 80;
                 const interval = setInterval(() => {
                     attempts++;
                     if (typeof updateCart === 'function') {
                         updateCart();
-                        console.log('✅ Contador actualizado tras ' + attempts + ' intentos');
+                        console.log(`✅ Contador actualizado desde header tras ${attempts} intentos`);
                         clearInterval(interval);
-                    } else if (attempts > 80) {
+                        return true;
+                    }
+                    if (attempts >= maxAttempts) {
                         clearInterval(interval);
-                        console.warn('⚠️ No se pudo encontrar updateCart()');
+                        console.warn('⚠️ No se pudo encontrar updateCart() después de muchos intentos');
                     }
                 }, 50);
+
+                return false;
             }
 
+            // Intentamos inmediatamente
             tryUpdateCart();
 
-            // 3. Búsqueda: Enter + Submit del formulario
+            // 3. Intento extra más tardío (por si script.js carga lento)
+            setTimeout(() => {
+                if (typeof updateCart === 'function') {
+                    updateCart();
+                    console.log('✅ Contador actualizado desde header (intento tardío)');
+                } else {
+                    console.warn('updateCart aún no disponible en intento tardío del header');
+                }
+            }, 800);
+
+            // 4. Búsqueda: Enter + Submit del formulario
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
 
@@ -168,6 +273,6 @@
                 });
             }
 
-        }, 10); // pequeño retraso para asegurar que todo el DOM esté listo
+        }, 10); // pequeño retraso inicial para asegurar DOM
     })();
 </script>

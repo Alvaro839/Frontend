@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras - TWINS TECH</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260228">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
@@ -73,7 +73,7 @@
 </div>
 
 <!-- JS PRINCIPAL -->
-<script src="script.js" defer></script>
+<script src="script.js?v=20260228" defer></script>
 
 <!-- Cargar Header -->
 <script>
@@ -84,9 +84,12 @@ fetch('header.html')
 
         setTimeout(() => {
             if (typeof initHeaderAfterLoad === 'function') initHeaderAfterLoad();
-            if (typeof updateCart === 'function') updateCart();
-            if (typeof renderCartItems === 'function') renderCartItems();   // ← importante
-        }, 150);
+            if (typeof updateCart === 'function') {
+                updateCart();
+                console.log('✅ Contador carrito actualizado después de cargar header (cart.html)');
+            }
+            if (typeof renderCartItems === 'function') renderCartItems();   // ← importante para cart page
+        }, 300);
     })
     .catch(err => console.error('Error cargando header:', err));
 </script>

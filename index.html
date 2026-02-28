@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TWINS TECH - Tienda de Hardware Tecnológico</title>
-    <!-- Agregamos ?v= para evitar caché del navegador -->
-    <link rel="stylesheet" href="styles.css?v=20260227">
+    <!-- Versión actualizada para romper caché -->
+    <link rel="stylesheet" href="styles.css?v=20260228">
 </head>
 <body>
 
@@ -13,7 +13,17 @@
     <script>
         fetch('header.html')
             .then(response => response.text())
-            .then(data => document.body.insertAdjacentHTML('afterbegin', data))
+            .then(data => {
+                document.body.insertAdjacentHTML('afterbegin', data);
+                
+                // ¡IMPORTANTE! Actualizamos el carrito DESPUÉS de que el header esté en el DOM
+                setTimeout(() => {
+                    if (typeof updateCart === 'function') {
+                        updateCart();
+                        console.log('✅ Contador carrito actualizado después de cargar header (index.html)');
+                    }
+                }, 300);
+            })
             .catch(err => console.error('Error cargando header:', err));
     </script>
 
@@ -44,8 +54,8 @@
     </div>
 
     <!-- Scripts -->
-    <!-- Agregamos ?v= para evitar caché del navegador -->
-    <script src="script.js?v=20260227"></script>
+    <!-- Versión actualizada para romper caché -->
+    <script src="script.js?v=20260228"></script>
 
 </body>
 </html>
