@@ -1316,9 +1316,12 @@ body {
     border-bottom: 1px solid #ddd;
     width: 100%;
     max-width: 100vw;
-    position: relative;
-    z-index: 20000;
-    overflow: visible; 
+
+    position: sticky;   /* 👈 CAMBIO IMPORTANTE */
+    top: 0;             /* 👈 SE PEGA ARRIBA */
+    z-index: 30000;     /* 👈 más alto que todo */
+
+    overflow: visible;
 }
 
 .header-top {

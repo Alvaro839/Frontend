@@ -637,8 +637,8 @@ function addToCart(id) {
     if (document.getElementById('cartItems')) renderCartItems();
 }
 
-// ====================== RENDER CARRITO (YA ESTÁ CORRECTO) ======================
 function renderCartItems() {
+
     const cartItemsContainer = document.getElementById('cartItems');
     const emptyCartContainer = document.getElementById('emptyCart');
 
@@ -661,8 +661,10 @@ function renderCartItems() {
     cartItemsContainer.innerHTML = '';
 
     currentCart.forEach((item, index) => {
+
         const div = document.createElement('div');
         div.classList.add('cart-item');
+        div.style.cursor = 'pointer';
 
         div.innerHTML = `
             <input type="checkbox" 
@@ -695,6 +697,22 @@ function renderCartItems() {
                 <button onclick="removeFromCart(${index})">Eliminar</button>
             </div>
         `;
+
+        // 🔥 CLICK PARA IR AL PRODUCTO
+        div.addEventListener('click', (e) => {
+
+            // Evita redirección si hace click en controles
+            if (
+                e.target.tagName === 'INPUT' ||
+                e.target.tagName === 'BUTTON' ||
+                e.target.closest('button') ||
+                e.target.closest('input')
+            ) return;
+
+            if (item.id) {
+                window.location.href = `product.html?id=${item.id}`;
+            }
+        });
 
         cartItemsContainer.appendChild(div);
     });
@@ -828,13 +846,11 @@ function forceUpdateCart() {
 
 // 1. Cuando el DOM está listo
 document.addEventListener('DOMContentLoaded', () => {
-    // Tu código existente...
     
-    // Primera actualización temprana
     setTimeout(forceUpdateCart, 100);
 });
 
-// 2. Cuando todo (incluyendo imágenes y fetch del header) ha cargado
+
 window.addEventListener('load', () => {
     setTimeout(forceUpdateCart, 300);     // 300 ms suele ser suficiente
     
@@ -1090,13 +1106,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => moveHorizontalAds(1), 5000);
 });
 
-// ============================================
-// BÚSQUEDA
-// ============================================
-
-// ============================================
-// INICIALIZACIÓN PRINCIPAL (único bloque DOMContentLoaded recomendado)
-// ============================================
 
 
 // Función separada para la lógica de búsqueda (puedes ponerla donde prefieras en el archivo)
@@ -1272,69 +1281,92 @@ function loadCategoryFilters() {
     }
 }
 
-// Cargar y mostrar productos filtrados (categoría + precio) //
- function loadCategoryProducts(cat = 'all') {
-    const container = document.getElementById('productsSection'); 
-    const title = document.getElementById('categoryTitle'); 
+// Cargar y mostrar productos filtrados (categoría + precio)
+// Cargar y mostrar productos filtrados (categoría + precio) - CORREGIDO
+function loadCategoryProducts(cat = 'all') {
+
+    const container = document.getElementById('productsSection');
+    const title = document.getElementById('categoryTitle');
     const count = document.getElementById('resultCount');
 
-    if (!container) { 
-        console.error("No se encontró #productsSection"); 
-        return; }
+    if (!container) return;
 
-   // Mensaje temporal mientras carga
     container.innerHTML = '<p style="text-align:center; padding:4rem; font-size:1.4rem;">Cargando productos...</p>';
 
- // Esperamos a que products esté cargado (por si llega tarde) 
- if (!products || products.length === 0) 
-    { setTimeout(() => loadCategoryProducts(cat), 500);
-         return; }
-    // Filtramos por categoría 
+    if (!products || products.length === 0) {
+        setTimeout(() => loadCategoryProducts(cat), 500);
+        return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+
     let filtered = products;
-    if (cat !== 'all') { 
-        filtered = products.filter(p => normalizeString(p.category) ===
-         normalizeString(cat)); }
-// FILTRO DE PRECIO (MIN + MAX)
-// ============================================
 
-const minInput = document.getElementById('minPrice');
-const maxInput = document.getElementById('maxPrice');
-const priceRange = document.getElementById('priceRange'); // opcional si aún usas slider
+    // =========================
+    // FILTRO POR CATEGORÍA
+    // =========================
+    if (cat !== 'all') {
+        filtered = filtered.filter(p =>
+            normalizeString(p.category) === normalizeString(cat)
+        );
+    }
 
-let minPrice = 0;
-let maxPrice = Infinity;
+    // =========================
+    // 🔥 FILTRO POR BÚSQUEDA (ESTO FALTABA)
+    // =========================
+    if (searchParam) {
+        const normalizedQuery = normalizeString(searchParam);
 
-// Si existen inputs manuales → prioridad
-if (minInput || maxInput) {
-    minPrice = parseFloat(minInput?.value) || 0;
-    maxPrice = parseFloat(maxInput?.value) || Infinity;
-}
-// Si NO existen inputs pero sí slider → fallback
-else if (priceRange) {
-    maxPrice = parseFloat(priceRange.value) || Infinity;
-}
+        filtered = filtered.filter(p =>
+            normalizeString(p.name).includes(normalizedQuery) ||
+            normalizeString(p.description || '').includes(normalizedQuery)
+        );
+    }
 
-// Validación
-if (minPrice > maxPrice) {
-    alert("El precio mínimo no puede ser mayor que el máximo.");
-    return;
-}
+    // =========================
+    // FILTRO DE PRECIO
+    // =========================
+    const minDesktop = document.getElementById('minPrice');
+    const maxDesktop = document.getElementById('maxPrice');
+    const minMobile  = document.getElementById('mobileMinPrice');
+    const maxMobile  = document.getElementById('mobileMaxPrice');
 
-filtered = filtered.filter(p => {
-    const price = parseFloat(p.price) || 0;
-    return price >= minPrice && price <= maxPrice;
-});
+    let minPrice = 0;
+    let maxPrice = Infinity;
 
-    // Limpiamos el contenedor
+    let minD = minDesktop ? parseFloat(minDesktop.value) : NaN;
+    let maxD = maxDesktop ? parseFloat(maxDesktop.value) : NaN;
+
+    if (!isNaN(minD) || !isNaN(maxD)) {
+        minPrice = isNaN(minD) ? 0 : minD;
+        maxPrice = isNaN(maxD) ? Infinity : maxD;
+    } else {
+        let minM = minMobile ? parseFloat(minMobile.value) : NaN;
+        let maxM = maxMobile ? parseFloat(maxMobile.value) : NaN;
+
+        minPrice = isNaN(minM) ? 0 : minM;
+        maxPrice = isNaN(maxM) ? Infinity : maxM;
+    }
+
+    filtered = filtered.filter(p => {
+        const price = parseFloat(p.price) || 0;
+        return price >= minPrice && price <= maxPrice;
+    });
+
+    // =========================
+    // RENDER
+    // =========================
     container.innerHTML = '';
 
     if (filtered.length === 0) {
         container.innerHTML = `
             <p style="text-align:center; padding:4rem; font-size:1.4rem; color:#666;">
-                No hay productos en esta categoría
+                No se encontraron productos
             </p>`;
     } else {
         filtered.forEach(product => {
+
             const card = document.createElement('div');
             card.classList.add('product-card');
 
@@ -1368,11 +1400,17 @@ filtered = filtered.filter(p => {
         });
     }
 
-    // Actualizamos título y contador
-   if (title) {
-        title.textContent = cat === 'all' 
-            ? 'Todos los productos' 
-            : (cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' '));
+    // =========================
+    // TÍTULO Y CONTADOR
+    // =========================
+    if (title) {
+        if (searchParam) {
+            title.textContent = `Resultados para "${searchParam}"`;
+        } else {
+            title.textContent = cat === 'all'
+                ? 'Todos los productos'
+                : (cat.charAt(0).toUpperCase() + cat.slice(1).replace(/-/g, ' '));
+        }
     }
 
     if (count) {
@@ -1385,6 +1423,9 @@ filtered = filtered.filter(p => {
 document.addEventListener('DOMContentLoaded', () => {
   
     cargarProductos().then(() => {
+
+        // 🔥 INICIALIZAMOS FILTRO DE PRECIO Y CATEGORÍAS (FALTABA ESTO)
+        initPriceFilterAndCategory();
 
         initSearchSuggestions();
 
