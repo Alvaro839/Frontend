@@ -33,11 +33,17 @@
 <header class="main-header dark-header">
     <div class="header-top">
         <!-- Logo -->
-        <div class="logo">
-            <a href="index.html">
-                <img src="img/Logos/TwinsTech.jpeg" alt="TWINS TECH" class="logo-img">
-            </a>
-        </div>
+     <script>
+fetch('/api/logo')
+  .then(res => res.json())
+  .then(data => {
+    const logo = document.getElementById('logo-img');
+
+    // IMPORTANTE: ruta donde tienes guardadas las imágenes
+    logo.src = '/img/Logos/' + data.logo;
+  })
+  .catch(err => console.error(err));
+</script>
 
         <!-- Buscador - Mejorado con <form> para mejor accesibilidad y Enter nativo -->
         <div class="search-container">
