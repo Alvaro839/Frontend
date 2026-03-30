@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const logo = document.getElementById('logo-img');
 
       if (logo && data.logo) {
-        logo.src = '/uploads/Logos/' + data.logo;
+        logo.src = data.logo; // ✅ CORRECTO
         console.log('✅ Logo cargado:', data.logo);
       } else {
         console.error('❌ No se encontró logo en BD o DOM');
