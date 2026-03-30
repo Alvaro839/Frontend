@@ -4,24 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TWINS TECH - Tienda de Hardware Tecnológico</title>
-    <!-- Versión para romper caché -->
     <link rel="stylesheet" href="styles.css?v=20260228f">
 </head>
 <body>
 
-    <!-- Header dinámico - BLINDADO TOTAL (chequea top-bar + header + categorías) -->
     <script>
         (function loadHeaderSafely() {
-            // Selector que cubre TODAS las partes del header
             const headerParts = document.querySelectorAll('.top-bar, .main-header, .categories');
             const countBefore = headerParts.length;
 
             console.log(`[index] Chequeo inicial: ${countBefore} partes de header encontradas`);
 
-            if (countBefore >= 3) {  // top-bar + main-header + categories ≈ 3
+            if (countBefore >= 3) {
                 console.log(`[index] Header YA completo (${countBefore}) → NO fetch`);
                 setTimeout(() => {
                     if (typeof updateCart === 'function') updateCart();
+                    if (typeof cargarLogo === 'function') cargarLogo(); // ✅ AGREGADO
                 }, 150);
                 return;
             }
@@ -34,7 +32,6 @@
                     return response.text();
                 })
                 .then(data => {
-                    // Chequeo justo antes de insertar
                     const currentCount = document.querySelectorAll('.top-bar, .main-header, .categories').length;
                     if (currentCount >= 3) {
                         console.warn(`[index] Header apareció durante fetch (${currentCount}) → abort`);
@@ -47,29 +44,31 @@
                     const countAfter = document.querySelectorAll('.top-bar, .main-header, .categories').length;
                     console.log(`[index] Partes después de insertar: ${countAfter}`);
 
-                    // Limpieza automática si hay duplicados
                     if (countAfter > 3) {
                         console.error('[index] ¡DUPLICADOS DETECTADOS! Limpiando extras...');
                         const allParts = document.querySelectorAll('.top-bar, .main-header, .categories');
-                        
-                        // Dejamos solo la primera ocurrencia de cada tipo
                         const keepers = new Set();
                         for (let el of allParts) {
                             const key = el.className.trim();
                             if (keepers.has(key)) {
                                 el.remove();
-                                console.log('[index] Eliminado duplicado:', key);
                             } else {
                                 keepers.add(key);
                             }
                         }
                     }
 
-                    // Actualizamos carrito
+                    // ✅ Carrito Y logo después de insertar el header
                     setTimeout(() => {
                         if (typeof updateCart === 'function') {
                             updateCart();
                             console.log('[index] ✅ Contador carrito actualizado post-inserción');
+                        }
+                        if (typeof cargarLogo === 'function') {
+                            cargarLogo(); // ✅ AGREGADO
+                            console.log('[index] ✅ Logo cargado post-inserción');
+                        } else {
+                            console.warn('[index] ⚠️ cargarLogo() no encontrada');
                         }
                     }, 400);
                 })
@@ -77,36 +76,27 @@
         })();
     </script>
 
-    <!-- Carrusel horizontal de anuncios - RESTAURADO -->
     <section class="horizontal-ads-carousel">
         <div class="carousel-container">
             <button class="carousel-arrow prev" onclick="moveHorizontalAds(-1)">❮</button>
-
             <div class="carousel-track" id="horizontalAdsTrack">
                 <div class="carousel-loading">Cargando anuncios...</div>
             </div>
-
             <button class="carousel-arrow next" onclick="moveHorizontalAds(1)">❯</button>
         </div>
-
         <div class="carousel-indicators" id="horizontalAdsIndicators"></div>
     </section>
 
-    <!-- Sección de Productos -->
     <section class="products-container">
         <div id="productsSection"></div>
     </section>
 
-    <!-- Anuncio lateral (opcional) -->
     <div class="side-ad">
-        <!-- Contenido del anuncio lateral -->
         <button class="close-ad" onclick="this.parentElement.style.display='none'">×</button>
     </div>
 
-    <!-- Scripts -->
     <script src="script.js?v=20260228f"></script>
 
-    <!-- Llamada explícita al carrusel -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof cargarAnuncios === 'function') {
