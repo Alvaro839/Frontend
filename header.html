@@ -43,23 +43,22 @@
             >
         </a>
 
-        <script>
-document.addEventListener('DOMContentLoaded', () => {
+       <script>
+function cargarLogo() {
     const BACKEND_URL = 'https://backend-ti9b.onrender.com';
-
     fetch(`${BACKEND_URL}/api/logo`)
         .then(res => res.json())
         .then(data => {
             const logo = document.getElementById('logo-img');
             if (logo && data.logo) {
-                logo.src = `${BACKEND_URL}${data.logo}`; // ✅ queda: https://backend-ti9b.onrender.com/uploads/Logos/Twins-LOGO.jpeg
+                logo.src = `${BACKEND_URL}${data.logo}`;
                 console.log('✅ Logo cargado:', logo.src);
             } else {
                 console.error('❌ No se encontró logo en BD o DOM');
             }
         })
         .catch(err => console.error('❌ Error cargando logo:', err));
-});
+}
 </script>
 
         <!-- Buscador -->
