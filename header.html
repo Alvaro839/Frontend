@@ -1,4 +1,3 @@
-
 <!-- header.html -->
 <!-- Top bar superior negra -->
 <div class="top-bar">
@@ -33,26 +32,38 @@
 <!-- Header principal (oscuro) -->
 <header class="main-header dark-header">
     <div class="header-top">
-        <!-- Logo -->
-    <script>
-document.addEventListener('DOMContentLoaded', () => {
-  fetch('/api/logo')
-    .then(res => res.json())
-    .then(data => {
-      const logo = document.getElementById('logo-img');
 
-      if (logo && data.logo) {
-        logo.src = data.logo; // ✅ CORRECTO
-        console.log('✅ Logo cargado:', data.logo);
-      } else {
-        console.error('❌ No se encontró logo en BD o DOM');
-      }
-    })
-    .catch(err => console.error('❌ Error cargando logo:', err));
-});
-</script>
+        <!-- ✅ Logo con <img> corregido -->
+        <a href="index.html" class="logo-link">
+            <img 
+                id="logo-img" 
+                src="" 
+                alt="Twins Tech Logo"
+                style="height: 60px; object-fit: contain;"
+            >
+        </a>
 
-        <!-- Buscador - Mejorado con <form> -->
+        <!-- ✅ Script del logo corregido -->
+        <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const BACKEND_URL = 'https://frontend-oak1.onrender.com'; // ← tu backend en Render
+
+            fetch(`${BACKEND_URL}/api/logo`)
+                .then(res => res.json())
+                .then(data => {
+                    const logo = document.getElementById('logo-img');
+                    if (logo && data.logo) {
+                        logo.src = BACKEND_URL + data.logo; // ✅ URL completa
+                        console.log('✅ Logo cargado:', logo.src);
+                    } else {
+                        console.error('❌ No se encontró logo en BD o DOM');
+                    }
+                })
+                .catch(err => console.error('❌ Error cargando logo:', err));
+        });
+        </script>
+
+        <!-- Buscador -->
         <div class="search-container">
             <form id="searchForm" class="search-form" action="javascript:void(0);">
                 <div class="search-input-wrapper">
@@ -101,11 +112,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- Scripts del header -->
 <script>
-    // IIFE para inicialización del header
     (function initHeader() {
-        // Esperamos un poco para que el DOM esté listo y las funciones externas existan
         setTimeout(() => {
-            // 1. Inicialización del menú de categorías
+            // 1. Menú de categorías
             const menuItems = document.querySelectorAll('#categoryMenu li[data-category]');
             const submenu = document.getElementById('submenu');
 
@@ -137,11 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             console.log('✅ Menú de categorías inicializado');
 
-            // 2. Manejo del carrito (versión robusta con reintentos)
+            // 2. Carrito
             function tryUpdateCart() {
                 if (typeof updateCart === 'function') {
                     updateCart();
-                    console.log('✅ Contador de carrito actualizado (intento inmediato desde header)');
+                    console.log('✅ Contador de carrito actualizado');
                     return true;
                 }
 
@@ -151,44 +160,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     attempts++;
                     if (typeof updateCart === 'function') {
                         updateCart();
-                        console.log(`✅ Contador actualizado desde header tras ${attempts} intentos`);
+                        console.log(`✅ Contador actualizado tras ${attempts} intentos`);
                         clearInterval(interval);
                         return true;
                     }
                     if (attempts >= maxAttempts) {
                         clearInterval(interval);
-                        console.warn('⚠️ No se pudo encontrar updateCart() después de muchos intentos');
+                        console.warn('⚠️ No se pudo encontrar updateCart()');
                     }
                 }, 50);
 
                 return false;
             }
 
-            // Intentamos inmediatamente
             tryUpdateCart();
 
-            // 3. Intento extra más tardío (por si script.js carga lento)
             setTimeout(() => {
                 if (typeof updateCart === 'function') {
                     updateCart();
-                    console.log('✅ Contador actualizado desde header (intento tardío)');
-                } else {
-                    console.warn('updateCart aún no disponible en intento tardío del header');
+                    console.log('✅ Contador actualizado (intento tardío)');
                 }
             }, 800);
 
-            // 4. Búsqueda: Enter + Submit del formulario
+            // 3. Búsqueda
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
 
             if (searchForm && searchInput) {
-                // Submit del formulario (Enter o botón)
                 searchForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     performSearch();
                 });
 
-                // Redundancia: Enter directo en el input
                 searchInput.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' || e.key === 'NumpadEnter') {
                         e.preventDefault();
@@ -197,6 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
-        }, 10); // pequeño retraso inicial para asegurar DOM
+        }, 10);
     })();
 </script>
