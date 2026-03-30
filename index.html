@@ -19,14 +19,14 @@
                 console.log(`[index] Header YA completo (${countBefore}) → NO fetch`);
                 setTimeout(() => {
                     if (typeof updateCart === 'function') updateCart();
-                    if (typeof cargarLogo === 'function') cargarLogo(); // ✅ AGREGADO
+                    if (typeof cargarLogo === 'function') cargarLogo();
                 }, 150);
                 return;
             }
 
             console.log('[index] No hay header completo → iniciando fetch');
 
-            fetch('header.html?v=20260228f')
+            fetch('header.html?v=20260330')  // ✅ VERSIÓN ACTUALIZADA
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.text();
@@ -58,14 +58,13 @@
                         }
                     }
 
-                    // ✅ Carrito Y logo después de insertar el header
                     setTimeout(() => {
                         if (typeof updateCart === 'function') {
                             updateCart();
                             console.log('[index] ✅ Contador carrito actualizado post-inserción');
                         }
                         if (typeof cargarLogo === 'function') {
-                            cargarLogo(); // ✅ AGREGADO
+                            cargarLogo();
                             console.log('[index] ✅ Logo cargado post-inserción');
                         } else {
                             console.warn('[index] ⚠️ cargarLogo() no encontrada');
