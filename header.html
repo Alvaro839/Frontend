@@ -44,7 +44,8 @@
 </a>
 
 <script>
-function cargarLogo() {
+// Hacemos la función global para que index.html pueda llamarla
+window.cargarLogo = function() {
     const BACKEND_URL = 'https://backend-ti9b.onrender.com';
     
     fetch(`${BACKEND_URL}/api/logo`)
@@ -61,17 +62,16 @@ function cargarLogo() {
                 
                 logo.src = fullUrl;
                 console.log('✅ Logo cargado correctamente:', fullUrl);
-            } else {
-                console.warn('⚠️ No se recibió ruta de logo');
             }
         })
         .catch(err => {
             console.error('❌ Error cargando logo:', err);
         });
-}
+};
 
-// ✅ IMPORTANTE: Llamar a la función
-document.addEventListener('DOMContentLoaded', cargarLogo);
+// Ejecutar automáticamente cuando se cargue el header
+document.addEventListener('DOMContentLoaded', window.cargarLogo);
+window.cargarLogo();   // Intento inmediato también
 </script>
 
         <!-- Buscador -->
