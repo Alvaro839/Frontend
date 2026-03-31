@@ -43,36 +43,6 @@
     >
 </a>
 
-<script>
-// Hacemos la función global para que index.html pueda llamarla
-window.cargarLogo = function() {
-    const BACKEND_URL = 'https://backend-ti9b.onrender.com';
-    
-    fetch(`${BACKEND_URL}/api/logo`)
-        .then(res => {
-            if (!res.ok) throw new Error('Error del servidor');
-            return res.json();
-        })
-        .then(data => {
-            const logo = document.getElementById('logo-img');
-            if (logo && data.logo) {
-                const fullUrl = data.logo.startsWith('http') 
-                    ? data.logo 
-                    : `${BACKEND_URL}${data.logo}`;
-                
-                logo.src = fullUrl;
-                console.log('✅ Logo cargado correctamente:', fullUrl);
-            }
-        })
-        .catch(err => {
-            console.error('❌ Error cargando logo:', err);
-        });
-};
-
-// Ejecutar automáticamente cuando se cargue el header
-document.addEventListener('DOMContentLoaded', window.cargarLogo);
-window.cargarLogo();   // Intento inmediato también
-</script>
 
         <!-- Buscador -->
         <div class="search-container">
