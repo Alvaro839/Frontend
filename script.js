@@ -1540,20 +1540,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 🔥 CARGA DEL LOGO (Versión más estable)
+// CARGA RÁPIDA DEL LOGO
 // ============================================
 function cargarLogo() {
-    const BACKEND_URL = "https://backend-ti9b.onrender.com";
     const logoImg = document.getElementById('logo-img');
-    
-    if (!logoImg) {
-        console.warn('⚠️ Elemento #logo-img no encontrado');
-        return;
-    }
+    if (!logoImg) return;
 
-    fetch(`${BACKEND_URL}/api/logo`)
+    const BACKEND_URL = "https://backend-ti9b.onrender.com";
+
+    fetch(`${BACKEND_URL}/api/logo`, { 
+        cache: 'no-cache'   // Evita caché vieja
+    })
         .then(res => {
-            if (!res.ok) throw new Error('Error del servidor');
+            if (!res.ok) throw new Error('Error servidor');
             return res.json();
         })
         .then(data => {
@@ -1563,21 +1562,18 @@ function cargarLogo() {
                     : `${BACKEND_URL}${data.logo}`;
                 
                 logoImg.src = fullUrl;
-                console.log('✅ Logo cargado correctamente:', fullUrl);
+                console.log('✅ Logo cargado:', fullUrl);
             }
         })
         .catch(err => {
-            console.error('❌ Error cargando logo:', err);
-            // Logo por defecto en caso de error
-            logoImg.src = 'https://via.placeholder.com/200x60/000000/FFFFFF?text=Twins+Tech';
+            console.error('Error logo:', err);
         });
 }
 
-// Ejecutar cuando todo esté cargado
+// Ejecutar lo más temprano posible
 document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(cargarLogo, 800);     // Primer intento
-    setTimeout(cargarLogo, 1500);    // Segundo intento (por si header es lento)
+    setTimeout(cargarLogo, 300);   // Más rápido
+    setTimeout(cargarLogo, 800);   // Segundo intento
 });
 
-// También exponerla globalmente por si acaso
 window.cargarLogo = cargarLogo;
