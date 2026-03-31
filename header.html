@@ -46,18 +46,26 @@
        <script>
 function cargarLogo() {
     const BACKEND_URL = 'https://backend-ti9b.onrender.com';
+    
     fetch(`${BACKEND_URL}/api/logo`)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Error del servidor');
+            return res.json();
+        })
         .then(data => {
             const logo = document.getElementById('logo-img');
             if (logo && data.logo) {
-                logo.src = `${BACKEND_URL}${data.logo}`;
-                console.log('✅ Logo cargado:', logo.src);
-            } else {
-                console.error('❌ No se encontró logo en BD o DOM');
+                const fullUrl = data.logo.startsWith('http') 
+                    ? data.logo 
+                    : `${BACKEND_URL}${data.logo}`;
+                
+                logo.src = fullUrl;
+                console.log('✅ Logo cargado:', fullUrl);
             }
         })
-        .catch(err => console.error('❌ Error cargando logo:', err));
+        .catch(err => {
+            console.error('❌ Error cargando logo:', err);
+        });
 }
 </script>
 
