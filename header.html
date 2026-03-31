@@ -33,17 +33,17 @@
 <header class="main-header dark-header">
     <div class="header-top">
 
-        <!-- ✅ Logo con <img> corregido -->
-        <a href="index.html" class="logo-link">
-            <img 
-                id="logo-img" 
-                src="" 
-                alt="Twins Tech Logo"
-                style="height: 60px; object-fit: contain;"
-            >
-        </a>
+<!-- Logo -->
+<a href="index.html" class="logo-link">
+    <img
+        id="logo-img"
+        src=""
+        alt="Twins Tech Logo"
+        style="height: 60px; object-fit: contain;"
+    >
+</a>
 
-       <script>
+<script>
 function cargarLogo() {
     const BACKEND_URL = 'https://backend-ti9b.onrender.com';
     
@@ -60,13 +60,18 @@ function cargarLogo() {
                     : `${BACKEND_URL}${data.logo}`;
                 
                 logo.src = fullUrl;
-                console.log('✅ Logo cargado:', fullUrl);
+                console.log('✅ Logo cargado correctamente:', fullUrl);
+            } else {
+                console.warn('⚠️ No se recibió ruta de logo');
             }
         })
         .catch(err => {
             console.error('❌ Error cargando logo:', err);
         });
 }
+
+// ✅ IMPORTANTE: Llamar a la función
+document.addEventListener('DOMContentLoaded', cargarLogo);
 </script>
 
         <!-- Buscador -->
